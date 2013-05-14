@@ -1,0 +1,11 @@
+/*
+ * Sanity
+ * 
+ * Make user agent strings legible
+ * Tom Byers | @tombyers
+ * Format blatantly copied from @rooreynolds Jargone
+ * 
+ * [NB: sanity.js is built using build.sh. Expect changes here to be overwritten]
+ */
+
+javascript:(function () { 

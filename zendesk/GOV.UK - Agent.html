@@ -1,0 +1,2843 @@
+<!doctype html>
+
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <title>Zendesk...</title>
+    <meta name="description" content="Agent view for Zendesk">
+    <meta name="author" content="Zendesk Inc.">
+    <link rel='shortcut icon' type='image/x-icon' href='https://assets.zendesk.com/agent/assets/favicon-fd2f32284ac17c51e350b79f01790763.ico' />
+    <link href="https://assets.zendesk.com/agent/assets/vendor-jquery-ui-8bf27f6dfff2e32be4542a989993a07d.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="https://assets.zendesk.com/agent/assets/application-77a634c71a40dd58aa1e8134c0953f42.css" media="all" rel="stylesheet" type="text/css" />
+<link href="https://assets.zendesk.com/agent/assets/application/elements-8960dec63debba3bb6a10fd5ba2f4b5c.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="https://assets.zendesk.com/agent/assets/ticket_forms-ffd37ab5d9a34860fdbad131bd793c7b.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="https://assets.zendesk.com/agent/assets/print-449bfbfb922a90d9e927acbddb496622.css" media="print" rel="stylesheet" type="text/css" />
+
+    <script src="https://assets.zendesk.com/agent/assets/head-d70038bd20553cf5ad0de10f4f08dca1.js" type="text/javascript"></script>
+
+    <script data-template-name="tickets/mustache_audits" type="text/x-raw-template">
+{{#each content}}
+
+{{#if isNew}}
+  <div class="event {{metaInfo}} is-new">
+{{else}}
+  <div class="event {{metaInfo}}">
+{{/if}}
+    <div class="content">
+      <div class="user_photo {{author.metaInfo}}">
+        <a href="{{author.href}}" tabindex="-1"><img class="profile" src={{author.profileImageUrl}}></a>
+        <i class="agent"></i>
+      </div>
+
+      <div class="header clearfix">
+        <div class="title">
+          <span class="name">
+            {{#if author.href}}
+              <a href="{{author.href}}" tabindex="-1">{{ author.name }}</a>
+            {{else}}
+              {{ author.name }}
+            {{/if}}
+          </span>
+          {{#if tweet}}
+            (<a href="{{viaSource.source.from.profile_url}}" tabindex="-1">@{{viaSource.source.from.username}}</a>)
+          {{/if}}
+
+          <span>{{{created_at}}}</span>
+          <span class="link_light assign_to for_save" data-action="assign-ticket" data-author-id="{{author.id}}">{{ author.assignToText }}</span>
+        </div>
+
+        <div class="channel"></div>
+        {{#if tweet }}
+          <a href="#" tabindex="-1" class="twitter-action follow"
+             data-action="follow"
+             data-comment-id="{{comment.id}}"
+             data-author="{{viaSource.source.from.username}}"
+             data-receiver="{{viaSource.source.to.username}}">
+            <span class="follow-mode">
+              <i></i><label>{{follow_label}}</label>
+            </span>
+            <span class="unfollow-mode">
+              <i></i><label>{{following_label}}</label>
+            </span>
+          </a>
+        {{else}}
+          <span class="on_behalf_of">{{{../onBehalfOf}}}</span>
+        {{/if}}
+
+      </div>
+
+      <div class="body">
+  {{#if comment }}
+    <div class="comment">
+       {{{ comment.value }}}
+    </div>
+  {{/if}}
+
+  {{#if voiceComment }}
+    {{#if voiceComment.value}}
+  <div class="comment">
+    {{{ voiceComment.value }}}
+  </div>
+{{/if}}
+
+<div class='audio player' id='audio_player_{{voiceComment.id}}_events' data-recording-url='{{voiceComment.recordingURL}}.mp3'></div>
+
+<div class='call_statistics'>
+  <h4>{{voiceComment.headerLabel}}</h4>
+  <dl class='call_info'>
+    <dt>{{ voiceComment.callFromLabel }}</dt>
+    <dd>{{ voiceComment.callFrom }}</dd>
+
+    <dt>{{ voiceComment.callToLabel }}</dt>
+    <dd>{{ voiceComment.callTo }}</dd>
+
+    <dt>{{ voiceComment.formattedStartedAtLabel }}</dt>
+    <dd>{{ voiceComment.formattedStartedAt }}</dd>
+
+    {{#if voiceComment.location}}
+      <dt>{{ voiceComment.locationLabel }}</dt>
+      <dd>{{ voiceComment.location }}</dd>
+    {{/if}}
+
+    <dt>{{ voiceComment.agentLabel }}</dt>
+    <dd>{{ voiceComment.agentName }}</dd>
+
+    <dt>{{ voiceComment.lengthOfPhoneCallLabel }}</dt>
+    <dd>{{ voiceComment.lengthOfPhoneCall }}</dd>
+  </dl>
+
+  {{#if voiceComment.transcriptionVisible}}
+    <h4>
+      {{ voiceComment.transcriptionLabel }}
+    </h4>
+    <p>{{voiceComment.transcription}}</p>
+  {{/if}}
+</div>
+
+  {{/if}}
+
+  {{#if facebookComment }}
+    {{#if facebookComment.value}}
+  <div class="comment">
+    {{{ facebookComment.value }}}
+
+    {{#if facebookComment.attachment}}
+      <p>{{{ facebookComment.attachment }}}</p>
+    {{/if}}
+  </div>
+{{/if}}
+
+{{#if facebookComment.shares}}
+  {{#each facebookComment.shares}}
+    {{{link}}}
+    {{description}}
+    {{picture}}
+  {{/each}}
+{{/if}}
+
+{{#if facebookComment.attachments}}
+  {{#each facebookComment.attachments}}
+    {{{this}}}
+  {{/each}}
+{{/if}}
+
+  {{/if}}
+
+  <ul class="attachments">
+    <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
+      {{#each comment.imageAttachments}}
+        <li class="image">
+          <a href="{{contentUrl}}" title="{{fileName}}" rel="gallery" tabindex="-1" class="attachment">
+            <img src="{{thumbnailContentUrl}}"/>
+            <div class="file_name">{{fileName}}</div>
+          </a>
+        </li>
+      {{/each}}
+    </div>
+
+    {{#each comment.nonImageAttachments}}
+      <li>
+        <a href="{{contentUrl}}" target="_blank" class="attachment" type="{{contentType}}" tabindex="-1">
+          <i class="icon-file"></i> {{ fileName }}
+        </a>
+      </li>
+    {{/each}}
+  </ul>
+
+  {{#if events }}
+    <ul class="audit-events">
+      {{#each events}}
+        <li class="{{type}}">
+          <i class="event_share icon-share-alt"></i>
+          <i class="event_change icon-ok-sign"></i>
+
+          <div class="info">
+            <label>
+              {{ label }}
+            </label>
+
+            {{ value }}
+            <del> {{ previous_value }} </del>
+
+            <div class="via">
+              {{ via }}
+            </div>
+          </div>
+
+
+        </li>
+      {{/each}}
+    </ul>
+  {{/if}}
+
+  <div class="via">
+    {{ via }}
+    {{#if hasRawEmail }}
+      (<a href="#" onclick="window.open('/audits/{{id}}/email.html','emailWindow','toolbar=0, menubar=0, width=620, height=594, location=0, status=0, directories=0, scrollbars=1'); return false;">{{rawEmailLabel}}</a>)
+    {{/if}}
+  </div>
+
+  <div class="client">
+    <ul>
+      <li>{{system.message_id}}</li>
+      <li>{{system.client}}<li/>
+      <li>{{system.ip_address}}<li/>
+      <li>{{system.location}}<li/>
+    </ul>
+  </div>
+</div>
+
+{{#if comment.screencasts }}
+  <ul id="screencasts_list">
+    {{#each comment.screencasts}}
+      <li style="background: url({{thumbnail}}) no-repeat;" class="screencast-thumb" data-screencast-id="{{id}}" ></li>
+    {{/each}}
+  </ul>
+{{/if}}
+
+{{#if tweet }}
+  <div class="tweet-footer-left">
+    <a class="twitter-timestamp" data-action="timestamp" data-comment-id="{{comment.id}}">{{{created_at}}}</a> via <a data-action="tweet-link" data-comment-id="{{comment.id}}">{{rel_formatted}}</a> to <a href="{{viaSource.source.to.profile_url}}" target="_blank">@{{viaSource.source.to.username}}</a>
+  </div>
+  <div class="tweet-footer-right">
+    <div class="actions">
+
+      <a href="#" class="twitter-action favorite"
+         data-action="favorite"
+         data-comment-id="{{comment.id}}">
+        <span class="favorite-mode">
+          <i></i><label>{{favorite_label}}</label>
+        </span>
+        <span class="unfavorite-mode">
+          <i></i><label>{{favorited_label}}</label>
+        </span>
+      </a>
+
+      <a href="#" class="twitter-action retweet"
+         data-action="retweet"
+         data-comment-id="{{comment.id}}">
+        <span class="retweet-mode">
+          <i></i><label>{{retweet_label}}</label>
+        </span>
+        <span class="unretweet-mode">
+          <i></i><label>{{retweeted_label}}</label>
+        </span>
+      </a>
+
+      <a href="#" class="twitter-action reply"
+         data-action="reply"
+         data-comment-id="{{comment.id}}">
+        <i></i><label>{{reply_label}}</label>
+      </a>
+
+    </div>
+  </div>
+{{/if}}
+
+
+    </div>
+
+  </div>
+
+{{/each}}
+</script>
+    <script data-template-name="tickets/main_pane" type="text/x-handlebars"><header>
+  <div class='pane left'>
+    {{view_module "views/section_toolbar/section_toolbar_view" delegateBinding="workspace"}}
+  </div>
+  <div class="pane right">
+    {{#if Zd.appsController.appsButtonVisible}}
+      <button {{action toggleApps target="Zendesk.appsController"}} {{bindAttr class=":origin :btn Zd.appsController.isActive:active"}} tabindex="-1">
+        {{t apps.button.toggle}}
+      </button>
+    {{/if}}
+    {{view_module "views/tickets/next_ticket_view" workspaceBinding="workspace"}}
+  </div>
+</header>
+
+{{#view_module "views/tickets/sidebar" controllerBinding="workspace.ticketController"}}
+  {{#view_module "views/tickets/collision_notification_view" class="collisionnotification collisionnotification-viewing"
+    titleBinding="workspace.ticket.moreThanTwoViewersDetailMessage" data-placement="top" classBinding="workspace.ticket.hasMoreThanTwoViewers:_tooltip" }}
+    {{{workspace.ticket.otherViewersMessage}}}
+  {{/view_module}}
+
+  {{#view_module "views/tickets/update_collision_view"}}
+    {{{otherUpdatersMessage}}}
+  {{/view_module}}
+  <div class="property_box section">
+
+  {{view_module "views/tickets/ticket_fields/requester_view" isVisibleBinding="workspace.ticketController.requesterMode"}}
+
+  {{view Zendesk.AssigneeView class="form_field"}}
+
+  {{#view Zendesk.CollaboratorsView class="form_field"}}
+    <label for="{{unbound fieldID}}">
+      {{ hintedLabelText }}
+      {{view Zd.CollaboratorsCcMeView class="info" ticketBinding="workspace.ticket"}}
+    </label>
+  {{/view}}
+
+  {{view_module "views/tickets/ticket_fields/linked_agreements_view"}}
+
+</div>
+
+{{#view class="property_box section" isVisibleBinding="workspace.ticketController.shouldShowTicketFormField"}}
+  {{view_module "views/tickets/ticket_fields/ticket_forms_view" controllerBinding="workspace.ticketController" ticketFormIdBinding="workspace.ticketController.ticket.ticketFormId"}}
+{{/view}}
+
+{{collection Zendesk.TicketPropertyCollectionWithoutAssigneeView contentBinding="ticketFields"}}
+
+{{/view_module}}
+
+{{#view class="pane right section"
+  classBinding="appsActive:with_apps_pane"
+  appsActiveBinding="Zendesk.appsController.isActive"
+  controllerBinding="workspace.ticketController"}}
+
+  {{#if workspace.ticket.isNew}}
+    <div class="ticket section new_ticket">
+  {{view_module "lib/lotus/labeled_text_field" class="field title" i18nLabel="ticket_fields.subject.label" valueBinding="workspace.ticket.subject" isVisibleBinding="workspace.shouldShowSubject"}}
+
+  {{#view Zendesk.AddCommentView contentBinding="controller.ticket" class="is-public"}}
+    {{view_module "views/tickets/markdown_toggle_view" controllerBinding="controller"}}
+    {{#if parentView.controller.isWriting}}
+      {{view Zendesk.LabeledCommentTextArea i18nLabel="ticket_fields.description.label" valueBinding="content.comment.body"}}
+    {{else}}
+      <label>{{t "ticket_fields.description.label"}}</label>
+      {{view_module "views/tickets/markdown_preview_view" controllerBinding="parentView.controller"}}
+    {{/if}}
+      <div class='add_comment_attachment_buttons'>
+  {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+    <span class="fileinput-button">
+      {{#view Zd.RecordScreencastButtonView tabindex="-1"}}
+        {{t txt.ticket.actions.record_screencast}}
+      {{/view}}
+    </span>
+  {{/if}}
+
+  {{#view class="fileinput-button _tooltip" titleTranslation="txt.ticket.comment_upload_tip"}}
+    <span class="fileinput-button-text">{{t txt.ticket.actions.attach_file}}</span>
+    <input type="file" name="uploaded_data" tabindex="-1"/>
+  {{/view}}
+</div>
+
+      <div class="add_comment_attachments">
+  {{#collection contentBinding="content.comment.uploadSet.attachments"
+                tagName="ul"
+                itemTagName="li"
+                itemClassBinding="content.uploading"
+                class="attachments"
+                controllerBinding="parentView.controller"}}
+
+    {{#if content.fileUrl}}
+      {{#linkTo content target="_blank" class="attachment" type="content.contentType"}}
+        <i class="icon-file"></i> {{content.label}}
+      {{/linkTo}}
+    {{else}}
+      <span class="attachment">{{content}}</span>
+    {{/if}}
+
+    {{#if content.uploading}}
+      <span class="ui-icon uploading">&nbsp;</span>
+    {{/if}}
+
+    {{#if content.deletable}}
+      <button {{action deleteAttachment target="controller"}} class="delete ui-state-default" tabindex="-1">
+        <span class="ui-icon ui-icon-close">&nbsp;</span>
+      </button>
+    {{/if}}
+
+    {{#if content.deleting}}
+      <span class="ui-icon deleting">&nbsp;</span>
+    {{/if}}
+  {{/collection}}
+
+  {{#view Zendesk.UploadSpinnerView}}
+    {{t txt.uploads.create.uploading}}
+  {{/view}}
+</div>
+
+      {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+  <div class="add_comment_screencasts">
+    <ul class="attachments screencasts">
+    {{#each content.comment.recordedScreencasts}}
+      <li data-screencast-id="{{id}}">
+        <a {{action showPreviewForRecorded target="Zd.screencastController"}} class="attachment" tabindex="-1">
+          <span class="screencast-icon"></span>{{t txt.ticket.actions.preview_screencast_title}} {{position}}
+        </a>
+        {{#view Zd.RemoveScreencastFromList contentBinding="this"}}
+          <span class="ui-icon ui-icon-close">&nbsp;</span>
+        {{/view}}
+      </li>
+    {{/each}}
+    </ul>
+  </div>
+{{/if}}
+
+  {{/view}}
+</div>
+
+  {{else}}
+    <div class='ticket section'>
+  {{#view_module "views/tickets/mast" class="header pane_header mast clearfix"}}
+  <nav class="conversation_mode sub_nav">
+    {{#if workspace.auditsController.showAllEvents}}
+      <a {{bindAttr href="workspace.ticketController.ticket.href"}} tabindex="-1">{{t txt.ticket.events.comments}} ({{workspace.ticketController.ticket.auditsWithComment.length}})</a>
+      <a class="active" tabindex="-1">{{t txt.ticket.events.all}}</a>
+    {{else}}
+      <a class="active" tabindex="-1">{{t txt.ticket.events.comments}} ({{workspace.ticketController.ticket.auditsWithComment.length}})</a>
+      <a {{bindAttr href="workspace.ticketController.ticket.eventsHref"}} tabindex="-1">{{t txt.ticket.events.all}}</a>
+    {{/if}}
+  </nav>
+
+  <div class="profile ticket"><div class="channel"></div></div>
+
+  <div class="editable">
+    {{view Zendesk.TicketSubjectMastView
+      valueBinding="workspace.ticketController.ticket.subject"
+      modelBinding="workspace.ticketController.ticket"}}
+  </div>
+
+  <div class="source delimited_items">
+    {{boundTimestamp workspace.ticketController.ticket.created_at full="true" relative="true" tagName="span" class="created_at"}}
+
+    {{view Zendesk.TicketSenderIdentityView controllerBinding="workspace.ticketController" tagName="span" class="sender"}}
+
+    {{view Zendesk.TicketReceiverIdentityView controllerBinding="workspace.ticketController" tagName="span" class="receiver"}}
+  </div>
+{{/view_module}}
+
+  {{view_module "views/tickets/call_console_ticket_view" ticketBinding="parentView.ticket"}}
+
+  <div class="pane_body section">
+    {{#if workspace.ticket.related.fromArchive}}
+  <div class="notice archived">
+    <p>{{t txt.ticket.archived.notice}}</p>
+  </div>
+{{/if}}
+
+{{#if workspace.ticket.related.followupSourceNotice}}
+  <div class="notice followup">
+    <p>{{{workspace.ticket.related.followupSourceNotice}}}</p>
+  </div>
+{{/if}}
+
+{{#if workspace.ticket.related.sharedNotice}}
+  <div class="notice shared">
+    {{{workspace.ticket.related.sharedNotice}}}
+  </div>
+{{/if}}
+
+{{#if workspace.ticket.related.satisfaction.offered}}
+  {{#view_module "views/tickets/satisfaction_notice_view" class="notice satisfaction" satisfactionBinding="workspace.ticket.related.satisfaction"}}
+    {{t txt.satisfaction.score.current}} <span {{bindAttr class="ratingClassName"}}>{{ratingLabel}}</span>
+    <p class="pre">{{comment}}</p>
+  {{/view_module}}
+{{/if}}
+
+    {{#view Zendesk.AddCommentView controllerBinding="controller" contentBinding="controller.ticket"}}
+
+  {{view_module "views/users/photo_view" userBinding="Zendesk.currentUser"}}
+  <div class="content">
+  <div class="header clearfix">
+    <ul class="comment_type">
+      {{#if view.controller.publicCommentOptionsVisible}}
+        {{#if view.controller.twitterChannelsVisible }}
+          {{view Zendesk.TwitterMentionChannelView controllerBinding="view.controller"}}
+          {{view Zendesk.TwitterDMChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.facebookChannelVisible }}
+          {{view Zendesk.FacebookWallChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.facebookPrivateMessageVisible }}
+          {{view Zendesk.FbPrivateMessageChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.shouldShowEmailOnlyOption }}
+          {{view Zendesk.EmailButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.shouldShowPublicReplyOption}}
+          {{view Zendesk.ReplyButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+        {{/if}}
+      {{/if}}
+
+      {{view Zendesk.NoteButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+    </ul>
+
+    <div class="hint reply">
+      {{view.controller.commentHint}}
+    </div>
+
+    {{#view_module "views/channels/call_back_view"  class="pull-right call-back"}}
+      <div class="toggle">
+        <div class="icon"></div>
+        <b class="caret"></b>
+      </div>
+      <div class="dropdown">
+        {{#each user.phoneIdentities}}
+          <button {{action selectNumber target="view"}} class="number option">{{value}}</button>
+        {{/each}}
+
+        <button class="enter option" {{action "openDialerWithTicketContext"}}>
+          {{t txt.views.tickets.add_comment_shared_content.enter_a_number}}
+        </button>
+      </div>
+    {{/view_module}}
+    {{view_module "views/tickets/markdown_toggle_view" controllerBinding="view.controller"}}
+  </div>
+
+    <div {{bindAttr class="controller.isGenerating:working :body"}}>
+    {{#if view.controller.isPreviewing}}
+      {{view_module "views/tickets/markdown_preview_view" controllerBinding="view.controller"}}
+    {{else}}
+      {{view Zendesk.TwitterCharCounter ticketBinding="view.controller.ticket"}}
+      {{view_module "views/tickets/comment_text_area" controllerBinding="view.controller" valueBinding="content.comment.body" class="autoresize"}}
+    {{/if}}
+    <div class="options">
+      {{#if view.controller.shouldShowAttachment }}
+        <div class='add_comment_attachment_buttons'>
+  {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+    <span class="fileinput-button">
+      {{#view Zd.RecordScreencastButtonView tabindex="-1"}}
+        {{t txt.ticket.actions.record_screencast}}
+      {{/view}}
+    </span>
+  {{/if}}
+
+  {{#view class="fileinput-button _tooltip" titleTranslation="txt.ticket.comment_upload_tip"}}
+    <span class="fileinput-button-text">{{t txt.ticket.actions.attach_file}}</span>
+    <input type="file" name="uploaded_data" tabindex="-1"/>
+  {{/view}}
+</div>
+
+        <div class="add_comment_attachments">
+  {{#collection contentBinding="content.comment.uploadSet.attachments"
+                tagName="ul"
+                itemTagName="li"
+                itemClassBinding="content.uploading"
+                class="attachments"
+                controllerBinding="parentView.controller"}}
+
+    {{#if content.fileUrl}}
+      {{#linkTo content target="_blank" class="attachment" type="content.contentType"}}
+        <i class="icon-file"></i> {{content.label}}
+      {{/linkTo}}
+    {{else}}
+      <span class="attachment">{{content}}</span>
+    {{/if}}
+
+    {{#if content.uploading}}
+      <span class="ui-icon uploading">&nbsp;</span>
+    {{/if}}
+
+    {{#if content.deletable}}
+      <button {{action deleteAttachment target="controller"}} class="delete ui-state-default" tabindex="-1">
+        <span class="ui-icon ui-icon-close">&nbsp;</span>
+      </button>
+    {{/if}}
+
+    {{#if content.deleting}}
+      <span class="ui-icon deleting">&nbsp;</span>
+    {{/if}}
+  {{/collection}}
+
+  {{#view Zendesk.UploadSpinnerView}}
+    {{t txt.uploads.create.uploading}}
+  {{/view}}
+</div>
+
+        {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+  <div class="add_comment_screencasts">
+    <ul class="attachments screencasts">
+    {{#each content.comment.recordedScreencasts}}
+      <li data-screencast-id="{{id}}">
+        <a {{action showPreviewForRecorded target="Zd.screencastController"}} class="attachment" tabindex="-1">
+          <span class="screencast-icon"></span>{{t txt.ticket.actions.preview_screencast_title}} {{position}}
+        </a>
+        {{#view Zd.RemoveScreencastFromList contentBinding="this"}}
+          <span class="ui-icon ui-icon-close">&nbsp;</span>
+        {{/view}}
+      </li>
+    {{/each}}
+    </ul>
+  </div>
+{{/if}}
+
+      {{/if}}
+
+      {{#view isVisibleBinding="view.controller.commentOptionsVisible" controllerBinding="view.controller" class="clearfix channel_options"}}
+        <label>
+          {{view Zendesk.ShortUrlCommentOptionView controllerBinding="view.controller" class="checkbox-field"}}
+          {{t txt.ticket.actions.twitter.append_ticket_link}}
+        </label>
+      {{/view}}
+    </div>
+
+    <div class="clear"></div>
+  </div>
+</div>
+
+
+{{/view}}
+
+
+    {{#if workspace.ticket.audits.content}}
+      {{view_module "views/tickets/mustache_audits_view" auditsControllerBinding="workspace.auditsController"}}
+    {{else}}
+      <i class="audits icon-loading-spinner"></i>
+    {{/if}}
+
+  </div>
+</div>
+
+  {{/if}}
+  {{view ChatLotus.ChatView class="chat-section" isVisibleBinding="workspace.chatController.isActive"}}
+{{/view}}
+
+{{view_module "views/tickets/ticket_app_container_view" isVisibleBinding="Zendesk.appsController.isActive" class="apps"}}
+
+<footer><div class='pane left section'>
+  {{#view class="dropup object_options"
+    targetBinding="parentView.workspace.ticketController"
+    ticketBinding="parentView.workspace.ticketController.ticket"
+    isVisibleBinding="parentView.workspace.ticketController.ticket.isNotNew"}}
+
+    <span class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+      {{t txt.ticket.actions.ticket_options}}
+      <b class="caret"></b>
+    </span>
+
+    <ul class="menu dropdown-menu">
+      <li {{action toForum target="target"}}><a>{{t txt.ticket.actions.to_forums}}</a></li>
+      {{#if Zendesk.globalPermissions.manageMacros}}
+        <li {{action toMacro target="target"}}><a>{{t txt.ticket.create_as_macro}}</a></li>
+      {{/if}}
+      {{#if workspace.ticketController.mergeButtonVisible}}
+        <li {{action mergeTicket target="target"}}><a>{{t txt.ticket.actions.merge_ticket_link}}</a></li>
+      {{/if}}
+      {{#if workspace.ticketController.deleteButtonVisible}}
+        <li {{action deleteTicket target="target"}}><a>{{t txt.delete_asset}}</a></li>
+      {{/if}}
+    </ul>
+  {{/view}}
+</div>
+
+<div class='pane right section'>
+  <div class="action_buttons">
+    {{view_module "views/tickets/macro_view" class="macro-selector" controllerBinding="workspace.ticketController"}}
+  </div>
+
+  {{view view.StatusView workspaceBinding="workspace"}}
+
+  <div class="ticket_chat_buttons">
+    {{view ChatLotus.EndChatButton workspaceBinding="workspace"}}
+  </div>
+
+  {{#if workspace.ticket.isClosed}}
+    <div class="ticket_submit_buttons followup">
+      {{t txt.ticket.is_closed}}
+      <button {{action createFollowupTicket target="controller"}} class="followup btn btn-inverse">
+        {{t txt.admin.helpers.tickets_helper.create_follow_up_label}}
+      </button>
+    </div>
+  {{/if}}
+</div>
+</footer>
+</script><script data-template-name="users/main_pane" type="text/x-handlebars"><header>
+  <div class='pane left'>
+    {{view_module "views/section_toolbar/section_toolbar_view" delegateBinding="delegate"}}
+  </div>
+</header>
+
+<div class='pane left section'>
+  
+{{#if delegate.user.suspended}}
+  <div class="property_alert alert alert-error">
+    {{t txt.admin.javascripts.users_show.user_suspended_banner}}
+  </div>
+{{/if}}
+
+{{view_module "views/users/properties_role_view" userBinding="user"}}
+
+<div class="property_box section details">
+  <div class="property clearfix identities delim">
+  {{#view Zendesk.IdentityView identitiesBinding="user.emailIdentities"}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.email}}</label>
+      {{#collection contentBinding="user.emailIdentities" itemClassBinding="content.primary:primary content.is_verified" class="value" itemClass="item email"}}
+        <span data-identity-id="{{unbound content.id}}" title="{{unbound content.value}}">{{unbound content.value}}</span>
+      {{/collection}}
+    </div>
+  {{/view}}
+
+  {{#view Zendesk.IdentityView identitiesBinding="user.googleIdentities"}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.google}}</label>
+      {{#collection contentBinding="user.googleIdentities" itemClassBinding="content.primary:primary content.is_verified" class="value" itemClass="item email"}}
+        <span data-identity-id="{{unbound content.id}}" title="{{unbound content.value}}">{{unbound content.value}}</span>
+      {{/collection}}
+    </div>
+  {{/view}}
+
+  {{#view Zendesk.IdentityView identitiesBinding="user.twitterIdentities"}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.twitter}}</label>
+      {{#collection contentBinding="user.twitterIdentities" class="value" itemClass="item"}}
+        <span data-identity-id="{{unbound content.id}}" title="@{{unbound content.data.screen_name}}">@{{unbound content.data.screen_name}}</span>
+      {{/collection}}
+    </div>
+  {{/view}}
+
+  {{#view Zendesk.IdentityView identitiesBinding="user.facebookIdentities"}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.facebook}}</label>
+      {{#collection contentBinding="user.facebookIdentities" class="value" itemClass="item" userBinding="user"}}
+        <span data-identity-id="{{unbound content.id}}" title="{{unbound content.value}}">{{unbound parentView.user.name}}</span>
+      {{/collection}}
+    </div>
+  {{/view}}
+
+  {{#view Zendesk.IdentityView identitiesBinding="user.openIdIdentities"}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.openid}}</label>
+      {{#collection contentBinding="user.openIdIdentities" class="value" itemClass="item"}}
+        <span data-identity-id="{{unbound content.id}}" title="{{unbound content.value}}">{{unbound content.value}}</span>
+      {{/collection}}
+    </div>
+  {{/view}}
+
+  <!-- Phone should be part of identities -->
+  {{view Zendesk.PhoneIdentityView}}
+
+  {{#view Zendesk.AddIdentityTriggerView}}
+    <div class="property clearfix identities">
+      <label>&nbsp;</label>
+      <span class="command">{{t "txt.identities.action.add_contact"}}</span>
+    </div>
+  {{/view}}
+
+  {{#view Zendesk.AddIdentityFormView}}
+    <div class="property clearfix">
+      <label>{{newContactLabel}}</label>
+      {{#if twitterType}}<span class="identity-twitter-label">@</span>{{/if}}
+      {{view Zendesk.AddIdentityTextFieldView valueBinding="Zendesk.addIdentityFormController.value" class="identity-field" classBinding="controller.isTwitter:twitter"}}
+    </div>
+  {{/view}}
+
+</div>
+
+
+  {{#view Zendesk.AgentForwardingView}}
+    <div class="property clearfix">
+      <label>{{t txt.users.edit.agent_forwarding}}</label>
+      {{#collection contentBinding="agentForwardingIdentities" class="value" itemClass="item"}}
+        {{getFlagByPhoneNumber content.value}}
+        <span class="number" data-identity-id="{{unbound content.id}}" title="{{unbound content.value}}">{{unbound content.value}}</span>
+      {{/collection}}
+      {{#unless agentForwardingIdentities}}
+        <a class="link" href="#" {{action "addForwardingNumber"}} onclick="return false;">
+          {{t "txt.users.edit.add_forwarding_number"}}
+        </a>
+      {{/unless}}
+    </div>
+  {{/view}}
+
+  {{#if settings.has_user_tags}}
+    {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.user.tags.title" contentI18n="help.user.tags.content" userBinding="user"}}
+      <label>{{t txt.users.edit.tags}}</label>
+      {{view Zendesk.UserTagsView}}
+    {{/view_module}}
+  {{/if}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.user.organization.title" contentI18n="help.user.organization.content"}}
+    <label>{{t txt.users.edit.organization_abbreviated}}</label>
+    {{#if Zd.organizations.isPaginated}}
+      {{view Zendesk.UserOrganizationsSearchView}}
+    {{else}}
+      {{view Zendesk.UserOrganizationsSelectView}}
+    {{/if}}
+  {{/view_module}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.user.language.title" contentI18n="help.user.language.content"}}
+    <label>{{t txt.users.edit.language}}</label>
+    {{view Zendesk.UserLocalesView}}
+  {{/view_module}}
+
+  {{#if settings.has_time_zone_selection}}
+    {{#view class="property clearfix" userBinding="user"}}
+      <label>{{t txt.users.edit.timezone}}</label>
+      {{view Zendesk.UserTimeZonesView}}
+    {{/view}}
+  {{/if}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.people.details.title" contentI18n="help.people.details.content2" userBinding="user"}}
+    <label>{{t txt.users.edit.details}}</label>
+    {{view Zd.UserDetailsView}}
+  {{/view_module}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.people.notes.title" contentI18n="help.people.notes.content2" userBinding="user"}}
+    <label>{{t txt.users.edit.notes}}</label>
+    {{view Zd.UserNotesView}}
+  {{/view_module}}
+</div>
+
+{{view_module "views/custom_fields/custom_field_collection" targetBinding="user" kind="user"}}
+
+<div class="log">
+  {{#if user.external_id}}
+    {{t txt.users.edit.external_id}} {{user.external_id}}</br>
+  {{/if}}
+  {{t txt.users.show.created }} {{{boundTimestamp user.created_at full="true"}}}</br>
+  {{t txt.users.show.updated }} {{{boundTimestamp user.updated_at full="true"}}}</br>
+  {{t txt.users.show.last_login }} {{{boundTimestamp user.last_login_at full="true"}}}
+</div>
+
+<footer>
+  <div class='pane left section'>
+    <div class="dropup object_options">
+      <span class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+        {{t txt.user.actions.user_options}}
+        <b class="caret"></b>
+      </span>
+
+      <ul class="menu dropdown-menu">
+        <li {{action newTicket target="controller"}}><a>{{t txt.ticket.new}}</a></li>
+        {{#if delegate.user.userPermissions.mergeUser}}
+          <li {{action mergeUser target="controller"}}><a>{{t txt.users.merge_user_link}}</a></li>
+        {{/if}}
+        {{#if delegate.user.userPermissions.resetPassword}}
+          <li {{action resetUserPassword target="controller"}}><a>{{t txt.users.reset_password.menu}}</a></li>
+        {{/if}}
+
+        {{#view_module "views/users/update_password_button"
+          target="controllerView.controller" action="updatePassword"
+          controllerBinding="controller"
+          propagateEvents="true"
+          isVisibleBinding="controller.canUpdatePassword"}}
+          <a>{{label}}</a>
+        {{/view_module}}
+
+        {{#if delegate.user.suspended}}
+          <li>
+          {{#view_module "views/users/suspension_button" targetBinding="controller"
+            action="unsuspendUser" userBinding="delegate.user"}}
+            {{t txt.admin.javascrips.users_show.unsusped_access_label}}
+          {{/view_module}}
+          </li>
+        {{else}}
+          <li>
+          {{#view_module "views/users/suspension_button" targetBinding="controller"
+            action="suspendUser" userBinding="delegate.user"}}
+            {{t txt.admin.javascrips.users_show.suspend_access_label}}
+          {{/view_module}}
+          </li>
+        {{/if}}
+
+        {{#if delegate.user.userPermissions.deleteUser}}
+          <li {{action deleteUser target="controller"}}><a>{{t txt.delete_asset}}</a></li>
+        {{/if}}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+{{#view class="pane right section" activeChildNameBinding="controller.section" controllerBinding="controller"}}
+  {{! TODO: combine the view and navbar once the logic of the collection helper is moved into CollectionView}}
+{{#view controllerBinding="parentView.controller" delegateBinding="parentView.delegate" class="mast"}}
+
+  {{#if parentView.controller.userPhotoController.canEditPhoto}}
+    {{view_module "views/users/editable_photo_view" controllerBinding="parentView.controller" userBinding="controller.user"}}
+  {{else}}
+    {{view_module "views/users/photo_view" userBinding="controller.user"}}
+  {{/if}}
+
+  <div class="editable">
+    {{view Zendesk.TextFieldEditableView valueBinding="controller.user.name" modelBinding="controller.user" disabledBinding="controller.user.userPermissions.notEditProperties"}}
+  </div>
+
+  {{#navbar delegate.navigationItems class="sub_nav"}}
+    {{content.displayText}}
+    <span class='count'>({{content.count}})</span>
+  {{/navbar}}
+{{/view}}
+
+  {{#view_module "lib/lotus/swappable_view"
+              name="assigned_tickets"
+              class="pane_body section"
+              classBinding="controller.filter.tickets.isFetching:working"
+              controllerBinding="parentView.controller.assignedTicketsController"}}
+
+  <h4 class="list-heading">
+    {{controller.title}} ({{controller.filter.ticketCount}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{view_module "views/filters/ticket_list_view" controllerBinding="controller"}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view"
+              name="tickets"
+              class="pane_body section"
+              classBinding="controller.filter.tickets.isFetching:working"
+              controllerBinding="parentView.controller.requestedTicketsController"}}
+
+  <h4 class="list-heading">
+    {{controller.title}} ({{controller.filter.ticketCount}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{view_module "views/filters/ticket_list_view" controllerBinding="controller"}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view"
+              name="ccs"
+              class="pane_body section ccs"
+              classBinding="controller.filter.tickets.isFetching:working"
+              controllerBinding="parentView.controller.ccdTicketsController"}}
+
+  <h4 class="list-heading">
+    {{controller.title}} ({{controller.filter.ticketCount}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{view_module "views/filters/ticket_list_view" controllerBinding="controller"}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view" name="topics" class="pane_body section" userBinding="parentView.user" classBinding="user.topics.isFetching:working"}}
+  <h4 class="list-heading">
+    {{t txt.user.section.topics}} ({{user.topics.length}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{#collection contentBinding="user.topics" class="items" tagName="ul" itemTagName="li" itemClassBinding="content.forum.type.label"}}
+    {{view templateName="templates/items/topic" contentBinding="content"}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="user.topicsIsEmpty" class="empty_set"}}
+    {{t txt.user.section.topics_none_full}}
+  {{/view}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view" name="topic_comments" class="pane_body section" userBinding="parentView.user" classBinding="user.topic_comments.isFetching:working"}}
+  <h4 class="list-heading">
+    {{t txt.user.section.topic_comments}} ({{user.topic_comments.length}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{#collection contentBinding="user.topic_comments" class="items" tagName="ul" itemTagName="li"}}
+    {{view templateName="templates/items/topic_comment" contentBinding="content"}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="user.topicCommentsIsEmpty" class="empty_set"}}
+    {{t txt.user.section.topic_comments_none_full}}
+  {{/view}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view" name="votes" class="pane_body section" userBinding="parentView.user" classBinding="user.votes.isFetching:working"}}
+  <h4 class="list-heading">
+    {{t txt.user.section.votes}} ({{user.votes.length}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{#collection contentBinding="user.votes" class="items" tagName="ul" itemTagName="li" itemClassBinding="content.forum.type.label"}}
+    {{view templateName="templates/items/topic" contentBinding="content"}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="user.votesIsEmpty" class="empty_set"}}
+    {{t txt.user.section.votes_none_full}}
+  {{/view}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view" name="subscriptions" class="pane_body section" userBinding="parentView.user" classBinding="user.subscriptions.isFetching:working"}}
+  <h4 class="list-heading">
+    {{t txt.user.section.subscriptions}} ({{user.subscriptions.length}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{#collection contentBinding="user.subscriptions" class="items" tagName="ul" itemTagName="li"}}
+    {{#if content.isForum}}
+      {{view templateName="templates/items/forum" contentBinding="content.source"}}
+    {{else}}
+      {{view templateName="templates/items/topic" contentBinding="content.source"}}
+    {{/if}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="user.subscriptionsIsEmpty" class="empty_set"}}
+    {{t txt.user.section.subscriptions_none_full}}
+  {{/view}}
+{{/view_module}}
+
+{{/view}}
+</script><script data-template-name="organizations/main_pane" type="text/x-handlebars"><header>
+  <div class='pane left'>
+    {{view_module "views/section_toolbar/section_toolbar_view" delegateBinding="delegate"}}
+  </div>
+</header>
+
+<div class='pane left section'>
+  <div class="property_box section details">
+
+  {{#if settings.has_user_tags}}
+    {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.organization.tags.title" contentI18n="help.organization.tags.content" organizationBinding="organization"}}
+      <label>{{t txt.users.edit.tags}}</label>
+      {{view Zendesk.OrganizationTagsView}}
+    {{/view_module}}
+  {{/if}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.organization.domains.title" contentI18n="help.organization.domains.content" organizationBinding="organization"}}
+    <label>{{t txt.organizations.edit.domains}}</label>
+    {{view Zendesk.TextAreaEditableView valueBinding="organization.domainNameList" modelBinding="organization" property="domainNameList" disabledBinding="organization.permissions.can_not_edit_properties"}}
+  {{/view_module}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.organization.group.title" contentI18n="help.organization.group.content" organizationBinding="organization"}}
+    <label>{{t txt.organizations.edit.group}}</label>
+    {{view Zendesk.OrganizationGroupsView}}
+  {{/view_module}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.organization.shared.title" contentI18n="help.organization.shared.content" organizationBinding="organization"}}
+    <label>{{t txt.organization.section.users}}</label>
+    {{view Zendesk.OrganizationIsSharedView}}
+  {{/view_module}}
+
+  <div {{bindAttr class="organization.shared_tickets:is_shared :property :clearfix :shared_comments"}}>
+    <label>&nbsp;</label>
+    {{view Zendesk.OrganizationIsSharedCommentsView}}
+  </div>
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.people.details.title" contentI18n="help.people.details.content2" organizationBinding="organization"}}
+    <label>{{t txt.users.edit.details}}</label>
+    {{view Zendesk.TextAreaEditableView valueBinding="organization.details" modelBinding="organization" property="details" disabledBinding="organization.permissions.can_not_edit_properties"}}
+  {{/view_module}}
+
+  {{#view_module "lib/views/popover_view" class="property clearfix" titleI18n="help.people.notes.title" contentI18n="help.people.notes.content2" organizationBinding="organization"}}
+    <label>{{t txt.users.edit.notes}}</label>
+    {{view Zendesk.TextAreaEditableView valueBinding="organization.notes" modelBinding="organization" property="notes" disabledBinding="organization.permissions.can_not_edit_properties"}}
+  {{/view_module}}
+</div>
+
+{{view_module "views/custom_fields/custom_field_collection" targetBinding="organization" kind="organization"}}
+
+<div class="log">
+  {{t txt.users.show.created }} {{{boundTimestamp organization.created_at full="true"}}}</br>
+  {{t txt.users.show.updated }} {{{boundTimestamp organization.updated_at full="true"}}}
+</div>
+
+<footer>
+  <div class='pane left section'>
+    <div class="dropup object_options">
+      <span class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+        {{t txt.organization.actions.organization_options}}
+        <b class="caret"></b>
+      </span>
+
+      <ul class="menu dropdown-menu">
+        {{#if Zendesk.currentUser.canCreateUser}}
+          <li {{action addUser target="controller"}}><a>{{t txt.organizations.add_user}}</a></li>
+        {{/if}}
+        {{#if Zd.globalPermissions.organizationEditing}}
+          <li {{action deleteOrganization target="controller"}}><a>{{t txt.delete_asset}}</a></li>
+        {{/if}}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+{{#view class="pane right section" activeChildNameBinding="controller.section" controllerBinding="controller"}}
+  {{! TODO: combine the view and navbar once the logic of the collection helper is moved into CollectionView}}
+{{#view delegateBinding="parentView.delegate" class="mast"}}
+  <img alt="Icon_org" class="profile organization" src="https://assets.zendesk.com/agent/assets/icons/objects/icon_org-28ccd8681881f66ecd9a2483d4002321.png" />
+
+  <div class="editable">
+    {{view Zendesk.TextFieldEditableView valueBinding="delegate.organization.name" modelBinding="delegate.organization" disabledBinding="delegate.organization.permissions.can_not_edit_properties"}}
+  </div>
+
+  {{#navbar delegate.navigationItemsForOrganization class="sub_nav"}}
+    {{content.displayText}}
+    <span class='count'>({{content.count}})</span>
+  {{/navbar}}
+{{/view}}
+
+  {{#view_module "lib/lotus/swappable_view"
+              name="tickets"
+              class="pane_body section"
+              classBinding="controller.filter.tickets.isFetching:working"
+              controllerBinding="parentView.controller.submittedTicketsController"}}
+
+  <h4 class="list-heading">
+    {{controller.title}} ({{controller.filter.ticketCount}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{view_module "views/filters/ticket_list_view" controllerBinding="controller"}}
+{{/view_module}}
+
+  {{#view_module "lib/lotus/swappable_view" name="users" class="pane_body section" classBinding="workspace.organization.users.isFetching:working"}}
+  <h4 class="list-heading">
+    {{t txt.organization.section.users}} ({{workspace.organization.users.length}})
+    <i class="icon-loading-spinner"></i>
+  </h4>
+
+  {{#collection contentBinding="workspace.organization.users" class="items" tagName="ul" itemTagName="li" }}
+    {{view templateName="templates/items/user" contentBinding="content"}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="workspace.organization.usersIsEmpty" class="empty_set"}}
+    {{t txt.organization.no_users}}
+  {{/view}}
+{{/view_module}}
+
+{{/view}}
+</script><script data-template-name="incidents/main_pane" type="text/x-handlebars"><header>
+  <div class='pane left'>
+    {{view_module "views/section_toolbar/section_toolbar_view" delegateBinding="workspace"}}
+  </div>
+</header>
+
+<div class='pane left section text'>
+  <h1>{{t txt.ticket.incidents.header}}</h1>
+
+<p>{{t txt.ticket.incidents.text1}}</p>
+<p>{{t txt.ticket.incidents.text2}}</p>
+
+</div>
+
+<div class="pane right section">
+  {{view_module "views/filters/ticket_list_view"
+              class="pane_body section incidents"
+              controllerBinding="workspace.incidentsController"
+              filterBinding="controller.filter"}}
+
+</div>
+</script><script data-template-name="filters/feeds/add_comment" type="text/x-handlebars">{{#if view.content.isViewedByOthers}}
+  <p class='other_viewers'>{{view.content.otherViewersMessage}}</p>
+{{/if}}
+
+<a class="close" {{action "toggleAddComment" target="parentView"}}>×</a>
+
+{{view "Zendesk.BareAssigneeView" tagName="span" ticketBinding="view.content"}}
+
+<div class="content">
+  <div class="header clearfix">
+    <ul class="comment_type">
+      {{#if view.controller.publicCommentOptionsVisible}}
+        {{#if view.controller.twitterChannelsVisible }}
+          {{view Zendesk.TwitterMentionChannelView controllerBinding="view.controller"}}
+          {{view Zendesk.TwitterDMChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.facebookChannelVisible }}
+          {{view Zendesk.FacebookWallChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.facebookPrivateMessageVisible }}
+          {{view Zendesk.FbPrivateMessageChannelView controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.shouldShowEmailOnlyOption }}
+          {{view Zendesk.EmailButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+        {{/if}}
+
+        {{#if view.controller.shouldShowPublicReplyOption}}
+          {{view Zendesk.ReplyButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+        {{/if}}
+      {{/if}}
+
+      {{view Zendesk.NoteButtonView commentBinding="view.content.comment" controllerBinding="view.controller"}}
+    </ul>
+
+    <div class="hint reply">
+      {{view.controller.commentHint}}
+    </div>
+
+    {{#view_module "views/channels/call_back_view"  class="pull-right call-back"}}
+      <div class="toggle">
+        <div class="icon"></div>
+        <b class="caret"></b>
+      </div>
+      <div class="dropdown">
+        {{#each user.phoneIdentities}}
+          <button {{action selectNumber target="view"}} class="number option">{{value}}</button>
+        {{/each}}
+
+        <button class="enter option" {{action "openDialerWithTicketContext"}}>
+          {{t txt.views.tickets.add_comment_shared_content.enter_a_number}}
+        </button>
+      </div>
+    {{/view_module}}
+    {{view_module "views/tickets/markdown_toggle_view" controllerBinding="view.controller"}}
+  </div>
+
+    <div {{bindAttr class="controller.isGenerating:working :body"}}>
+    {{#if view.controller.isPreviewing}}
+      {{view_module "views/tickets/markdown_preview_view" controllerBinding="view.controller"}}
+    {{else}}
+      {{view Zendesk.TwitterCharCounter ticketBinding="view.controller.ticket"}}
+      {{view_module "views/tickets/comment_text_area" controllerBinding="view.controller" valueBinding="content.comment.body" class="autoresize"}}
+    {{/if}}
+    <div class="options">
+      {{#if view.controller.shouldShowAttachment }}
+        <div class='add_comment_attachment_buttons'>
+  {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+    <span class="fileinput-button">
+      {{#view Zd.RecordScreencastButtonView tabindex="-1"}}
+        {{t txt.ticket.actions.record_screencast}}
+      {{/view}}
+    </span>
+  {{/if}}
+
+  {{#view class="fileinput-button _tooltip" titleTranslation="txt.ticket.comment_upload_tip"}}
+    <span class="fileinput-button-text">{{t txt.ticket.actions.attach_file}}</span>
+    <input type="file" name="uploaded_data" tabindex="-1"/>
+  {{/view}}
+</div>
+
+        <div class="add_comment_attachments">
+  {{#collection contentBinding="content.comment.uploadSet.attachments"
+                tagName="ul"
+                itemTagName="li"
+                itemClassBinding="content.uploading"
+                class="attachments"
+                controllerBinding="parentView.controller"}}
+
+    {{#if content.fileUrl}}
+      {{#linkTo content target="_blank" class="attachment" type="content.contentType"}}
+        <i class="icon-file"></i> {{content.label}}
+      {{/linkTo}}
+    {{else}}
+      <span class="attachment">{{content}}</span>
+    {{/if}}
+
+    {{#if content.uploading}}
+      <span class="ui-icon uploading">&nbsp;</span>
+    {{/if}}
+
+    {{#if content.deletable}}
+      <button {{action deleteAttachment target="controller"}} class="delete ui-state-default" tabindex="-1">
+        <span class="ui-icon ui-icon-close">&nbsp;</span>
+      </button>
+    {{/if}}
+
+    {{#if content.deleting}}
+      <span class="ui-icon deleting">&nbsp;</span>
+    {{/if}}
+  {{/collection}}
+
+  {{#view Zendesk.UploadSpinnerView}}
+    {{t txt.uploads.create.uploading}}
+  {{/view}}
+</div>
+
+        {{#if currentAccount.settings.screencastsForTicketsEnabled}}
+  <div class="add_comment_screencasts">
+    <ul class="attachments screencasts">
+    {{#each content.comment.recordedScreencasts}}
+      <li data-screencast-id="{{id}}">
+        <a {{action showPreviewForRecorded target="Zd.screencastController"}} class="attachment" tabindex="-1">
+          <span class="screencast-icon"></span>{{t txt.ticket.actions.preview_screencast_title}} {{position}}
+        </a>
+        {{#view Zd.RemoveScreencastFromList contentBinding="this"}}
+          <span class="ui-icon ui-icon-close">&nbsp;</span>
+        {{/view}}
+      </li>
+    {{/each}}
+    </ul>
+  </div>
+{{/if}}
+
+      {{/if}}
+
+      {{#view isVisibleBinding="view.controller.commentOptionsVisible" controllerBinding="view.controller" class="clearfix channel_options"}}
+        <label>
+          {{view Zendesk.ShortUrlCommentOptionView controllerBinding="view.controller" class="checkbox-field"}}
+          {{t txt.ticket.actions.twitter.append_ticket_link}}
+        </label>
+      {{/view}}
+    </div>
+
+    <div class="clear"></div>
+  </div>
+</div>
+
+
+{{view_module "views/tickets/macro_view" class="macro-selector" controllerBinding="view.controller" ticketBinding="view.content"}}
+
+<div class="btn-group dropup ticket_submit_buttons">
+  <button {{action "save" target="controller"}} class="save btn btn-inverse">
+    {{t txt.ticket.actions.save_as_status_with_formatting statusBinding="content.statusDisplayName"}}
+  </button>
+
+  <button class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
+    <span class="caret"></span>
+  </button>
+
+  <ul class="menu dropdown-menu pull-right">
+    {{view_module "views/tickets/submit_view" status="new"}}
+{{view_module "views/tickets/submit_view" status="open"}}
+{{view_module "views/tickets/submit_view" status="pending"}}
+{{view_module "views/tickets/submit_view" status="hold"}}
+{{view_module "views/tickets/submit_view" status="solved"}}
+
+  </ul>
+</div>
+</script><script data-template-name="launchpad/tour/carousel" type="text/x-handlebars"><div id="tour-carousel" class="carousel slide tour_page">
+  {{#if Zd.currentUser.isAdmin}}
+    <div class="carousel-inner">
+        <div class="active item">
+          <div class="configure_email">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.engage_with_customers.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.engage_with_customers.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action "goToConfigureEmail" target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.engage_with_customers.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="benchmark">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+    <h3>{{t txt.launchpad.tour.benchmark.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.benchmark.copy}}</p>
+
+    <button {{action goToBenchmark target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.benchmark.button}}
+    </button>
+
+    <div class="industry">
+        <div class="category"><div class="dim">{{t txt.launchpad.tour.benchmark.industry_label}}</div>{{t txt.launchpad.tour.benchmark.travel_label}}</div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.91_percent}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.customer_satisfaction_label}}</div>
+        </div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.14_7_hrs}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.response_time_label}}</div>
+        </div>
+        <div class="data">
+          1495<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.tickets_label}}</div>
+        </div>
+    </div>
+
+    <div class="global">
+        <div class="category">{{t txt.launchpad.tour.benchmark.global_label}}</div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.86_percent}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.customer_satisfaction_label}}</div>
+        </div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.23_6}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.response_time_label}}</div>
+        </div>
+        <div class="data">
+          631<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.tickets_label}}</div>
+        </div>
+    </div>
+
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="web_portal">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.help_center.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.help_center.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action goToConfigureWebPortal target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.help_center.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="zapps">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.apps.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.apps.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action goToApps target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.apps.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="macros">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.macros.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.macros.copy}}</p>
+
+    <button {{action goToMacros target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.macros.button}}
+    </button>
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="test_ticket">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.first_ticket.title}}</h3>
+
+    <p>{{t txt.launchpad.tour.first_ticket.copy}}</p>
+
+    <button {{action goToTestTicket target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.menu.task.testTicket.label}}
+    </button>
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="crerate_view">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7" class="current"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3" class="current"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.organize_tickets.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.organize_tickets.copy}}</p>
+
+    <button {{action goToCreateView target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.organize_tickets.button}}
+    </button>
+  </div>
+</div>
+
+        </div>
+    </div>
+  {{else}}
+    <div class="carousel-inner">
+        <div class="active item">
+          <div class="macros">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.macros.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.macros.copy}}</p>
+
+    <button {{action goToMacros target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.macros.button}}
+    </button>
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="test_ticket">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.first_ticket.title}}</h3>
+
+    <p>{{t txt.launchpad.tour.first_ticket.copy}}</p>
+
+    <button {{action goToTestTicket target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.menu.task.testTicket.label}}
+    </button>
+  </div>
+</div>
+
+        </div>
+        <div class="item">
+          <div class="crerate_view">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7" class="current"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3" class="current"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.organize_tickets.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.organize_tickets.copy}}</p>
+
+    <button {{action goToCreateView target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.organize_tickets.button}}
+    </button>
+  </div>
+</div>
+
+        </div>
+    </div>
+  {{/if}}
+
+  <a class="carousel-control left" href="#tour-carousel" data-slide="prev">&lsaquo;</a>
+  <a class="carousel-control right" href="#tour-carousel" data-slide="next">&rsaquo;</a>
+</div>
+</script><script data-template-name="launchpad/tour/configure_email" type="text/x-handlebars"><div class="configure_email">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.engage_with_customers.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.engage_with_customers.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action "goToConfigureEmail" target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.engage_with_customers.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/web_portal" type="text/x-handlebars"><div class="web_portal">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.help_center.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.help_center.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action goToConfigureWebPortal target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.help_center.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/benchmark" type="text/x-handlebars"><div class="benchmark">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+    <h3>{{t txt.launchpad.tour.benchmark.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.benchmark.copy}}</p>
+
+    <button {{action goToBenchmark target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.benchmark.button}}
+    </button>
+
+    <div class="industry">
+        <div class="category"><div class="dim">{{t txt.launchpad.tour.benchmark.industry_label}}</div>{{t txt.launchpad.tour.benchmark.travel_label}}</div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.91_percent}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.customer_satisfaction_label}}</div>
+        </div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.14_7_hrs}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.response_time_label}}</div>
+        </div>
+        <div class="data">
+          1495<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.tickets_label}}</div>
+        </div>
+    </div>
+
+    <div class="global">
+        <div class="category">{{t txt.launchpad.tour.benchmark.global_label}}</div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.86_percent}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.customer_satisfaction_label}}</div>
+        </div>
+        <div class="data">
+          {{t txt.launchpad.tour.benchmark.23_6}}<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.response_time_label}}</div>
+        </div>
+        <div class="data">
+          631<br/>
+          <div class="description">{{t txt.launchpad.tour.benchmark.tickets_label}}</div>
+        </div>
+    </div>
+
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/macros" type="text/x-handlebars"><div class="macros">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.macros.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.macros.copy}}</p>
+
+    <button {{action goToMacros target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.macros.button}}
+    </button>
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/apps" type="text/x-handlebars"><div class="zapps">
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.apps.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.apps.copy}}</p>
+
+    {{#unboundIf Zd.currentUser.isAdmin}}
+      <button {{action goToApps target="Zd.launchpadViewStates"}} class="btn">
+        {{t txt.launchpad.tour.apps.button}}
+      </button>
+    {{/unboundIf}}
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/test_ticket" type="text/x-handlebars"><div class="test_ticket">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2" class="current"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.first_ticket.title}}</h3>
+
+    <p>{{t txt.launchpad.tour.first_ticket.copy}}</p>
+
+    <button {{action goToTestTicket target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.menu.task.testTicket.label}}
+    </button>
+  </div>
+</div>
+</script><script data-template-name="launchpad/tour/create_view" type="text/x-handlebars"><div class="crerate_view">
+{{#if Zd.currentUser.isAdmin}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="4"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="5"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="6"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="7" class="current"}}
+</nav>
+
+{{else}}
+  
+<nav>
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="1"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="2"}}
+      {{view_module "views/launchpad/page_button" controllerBinding="Zd.launchpadViewStates.announcements" page="3" class="current"}}
+</nav>
+
+{{/if}}
+
+  <div class="content clearfix">
+
+    <h3>{{t txt.launchpad.tour.organize_tickets.heading}}</h3>
+
+    <p>{{t txt.launchpad.tour.organize_tickets.copy}}</p>
+
+    <button {{action goToCreateView target="Zd.launchpadViewStates"}} class="btn">
+      {{t txt.launchpad.tour.organize_tickets.button}}
+    </button>
+  </div>
+</div>
+</script><script data-template-name="main_pane/dashboard" type="text/x-handlebars"><header>
+  {{#unboundIf launchpadController.shouldShowUser}}
+    <div class="pane left">
+  {{#view_module "views/launchpad/toggle_view"}}
+    {{#view_module "views/launchpad/dashboard_button" action="activateDashboard"}}
+      {{t txt.launchpad.activation_button.hide}}
+    {{/view_module}}
+
+    {{#view_module "views/launchpad/launchpad_button" action="activateLaunchpad"}}
+      {{t txt.launchpad.activation_button.show2}}
+    {{/view_module}}
+  {{/view_module}}
+</div>
+
+<div class="pane right">
+  {{#if currentAccount.isTrialAccount}}
+    <div class="left">
+      {{#view_module "views/dashboard/buy_now_button"}}
+        {{t txt.admin.views.layouts.settings_tab.buy_now}}
+      {{/view_module}}
+    </div>
+    <div class="left days_left_in_trial">
+      {{#if launchpadController.shouldShowTrialCountdown}}
+        <warn>{{currentAccount.daysLeftInTrial}}</warn>
+        {{t txt.admin.public.javascript.header_renderer.days_left_in_trial_label}}
+      {{else}}
+        <warn>{{t txt.launchpad.trial.expired_text}}</warn>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <div class="right">
+    <div class="btn-group">
+      {{view_module "views/launchpad/learn_more_view" class="learn_more"}}
+    </div>
+  </div>
+</div>
+
+  {{else}}
+    <h1>{{t txt.dashboard.title}}</h1>
+  {{/unboundIf}}
+</header>
+
+{{#view_module "views/dashboard/launchpad_swappable_view" class="pane left section aux-content"}}
+  {{#view_module "lib/lotus/swappable_view" name="updates"}}
+    <div class="activities">
+
+  <h4>{{t "txt.dashboard.activities.title"}}</h4>
+
+  {{view_module "views/dashboard/activities_view" class="wrapper"}}
+
+</div>
+
+  {{/view_module}}
+  {{#unboundIf launchpadController.shouldShowUser}}
+    {{#view_module "lib/lotus/swappable_view" name="launchpad"}}
+      {{view_module "views/launchpad/menu_view" class="stacked_menu"}}
+    {{/view_module}}
+  {{/unboundIf}}
+{{/view_module}}
+
+{{#view_module "views/dashboard/launchpad_swappable_view" class="pane right section"}}
+  {{#view_module "lib/lotus/swappable_view" name="updates"}}
+    <div class="indicators clearfix">
+
+  <div class="stats-group">
+    {{t txt.admin.views.shared._csr_data_boxes.Open_Tickets_now tagName="h4"}}
+    <ul>
+
+      <li {{action showMyTickets target="Zd.dashboardController"}} {{bindAttr class=":clickable Zd.dashboardController.isMyTicketsActive:active"}}>
+        <div class="cell-value">{{Zd.dashboardIndicators.openTickets}}</div>
+        <div class="cell-title">{{t txt.helpers.dashboard_helper.You}}</div>
+      </li>
+
+      <li {{action showGroupTickets target="Zd.dashboardController"}} {{bindAttr class=":clickable Zd.dashboardController.isGroupTicketsActive:active"}}>
+        <div class="cell-value">{{Zd.dashboardIndicators.groupOpenTickets}}</div>
+        <div class="cell-title">{{t txt.helpers.dashboard_helper.Groups}}</div>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="stats-group">
+    {{t txt.admin.views.shared._csr_data_boxes.Ticket_Statistics_this_week tagName="h4"}}
+    <ul>
+
+      <li {{action showGoodTickets target="Zd.dashboardController"}} {{bindAttr class=":clickable Zd.dashboardController.isGoodTicketsActive:active"}}>
+        <div class="cell-value">{{Zd.dashboardIndicators.ticketsRatedGoodThisWeek}}</div>
+        <div class="cell-title">{{t txt.helpers.dashboard_helper.Good}}</div>
+      </li>
+
+      <li {{action showBadTickets target="Zd.dashboardController"}} {{bindAttr class=":clickable Zd.dashboardController.isBadTicketsActive:active"}}>
+        <div class="cell-value">{{Zd.dashboardIndicators.ticketsRatedBadThisWeek}}</div>
+        <div class="cell-title">{{t txt.helpers.dashboard_helper.Bad}}</div>
+      </li>
+
+      <li {{action showSolvedTickets target="Zd.dashboardController"}} {{bindAttr class=":clickable Zd.dashboardController.isSolvedTicketsActive:active"}}>
+        <div class="cell-value">{{Zd.dashboardIndicators.ticketsSolvedThisWeek}}</div>
+        <div class="cell-title">{{t txt.helpers.dashboard_helper.Solved}}</div>
+      </li>
+
+    </ul>
+  </div>
+
+  {{#if Zd.dashboardController.isStatsOn}}
+    <div class="stats-group">
+      {{t txt.admin.views.shared._csr_data_boxes.Satisfaction_Statistics_60_days tagName="h4"}}
+      <ul>
+
+        {{#view tagName="li" classBinding="Zd.dashboardController.isUserStatsOff:hidden"}}
+          <div class="cell-value">{{Zd.dashboardIndicators.satScoreLast60Days}}</div>
+          <div class="cell-title">{{t txt.admin.views.shared._csr_data_boxes.You}}</div>
+        {{/view}}
+
+        {{#view tagName="li" classBinding="Zd.dashboardController.isAccountStatsOff:hidden"}}
+          <div class="cell-value">{{Zd.dashboardIndicators.accountSatScoreLast60Days}}</div>
+          <div class="cell-title">{{t txt.admin.views.shared._csr_data_boxes.Help_desk}}</div>
+        {{/view}}
+
+      </ul>
+    </div>
+  {{/if}}
+</div>
+
+    {{view_module "views/play/play_start_view" class="origin" filterBinding="controller.filter"}}
+<h4 class="list-heading" {{bindAttr class="controller.filter.tickets.isFetching:working"}}>
+  {{#if controller.isIncomingTicketsActive}}
+    {{t txt.dashboard.tickets.title}} ({{controller.incomingFilter.ticketCount}})
+    {{#view_module "lib/views/popover_view" tagName="span" class="link" placement="bottom" titleI18n="help.incoming.title" contentI18n="help.incoming.content"}}{{t help.what_is_this_title}}{{/view_module}}
+  {{else}}
+    {{#view_module "views/dashboard/ticket_list_title_view" controllerBinding="controller"}}
+      {{title}} ({{ticketCount}})
+    {{/view_module}}
+  {{/if}}
+  <i class="icon-loading-spinner"></i>
+</h4>
+
+{{view_module "views/filters/ticket_list_view" controllerBinding="controller"}}
+
+  {{/view_module}}
+  {{#unboundIf launchpadController.shouldShowUser}}
+    {{#view_module "lib/lotus/swappable_view" name="launchpad"}}
+      {{view_module "views/launchpad/view_states_root_view"}}
+    {{/view_module}}
+  {{/unboundIf}}
+{{/view_module}}
+</script><script data-template-name="filters/ticket_list" type="text/x-handlebars"><table class="filter_tickets">
+  <thead>
+    {{view Zendesk.FilterTableHeaderView filterBinding="controller.filter" controllerBinding="controller"}}
+  </thead>
+
+  {{#collection Zendesk.TicketsTableBodyView
+      controllerBinding="controller"
+      itemControllerBinding="controller"
+      contentBinding="controller.filter.tickets"
+      columnsBinding="controller.filter.columns"
+      groupingColumnBinding="controller.filter.groupingColumn"}}
+  {{/collection}}
+
+  {{#view isVisibleBinding="controller.filter.isEmpty" tagName="tr"}}
+    <td colspan="100">{{t txt.filters.empty_filter}}</td>
+  {{/view}}
+
+</table>
+
+{{view Zd.Pagination.View controllerBinding="controller"}}
+{{view_module "views/ticket_list/bulk_footer_view" controllerBinding="controller"}}
+</script>
+    <script data-template-name="chat/availability" type="text/x-handlebars"><li class="divider"></li>
+<li class="header">
+  {{t txt.header.channels.chat}}
+</li>
+<li class="channel_option">
+  <a {{action "setAvailable" target="ChatLotus.Service.Availability"}} class="button entry on">
+    {{view tagName="span" classNameBindings="ChatLotus.Service.Availability.available:active" class="icon"}}
+    {{t txt.header.chat.availabilities.on}}
+  </a>
+</li>
+<li class="channel_option">
+  <a {{action "setUnavailable" target="ChatLotus.Service.Availability"}} class="button entry off">
+    {{view tagName="span" classNameBindings="ChatLotus.Service.Availability.available:active" class="icon"}}
+    {{t txt.header.chat.availabilities.off}}
+  </a>
+</li>
+</script><script data-template-name="chat/message" type="text/x-handlebars"><div class="stanza">
+
+  {{#if content.message}}
+    <h3>
+
+      {{#if content.user.alias }}
+        {{ content.user.alias }}
+      {{ else }}
+        {{ content.user.name }}
+      {{/if}}
+
+      <strong>:</strong>
+
+      <span class="time">{{content.hour}}:{{content.minute}}</span>
+
+    </h3>
+
+      <p class="message-body">
+        {{renderMessage content.message}}
+      </p>
+
+      {{#unless content.delivered}}
+      <div class="delivered">
+        {{t txt.chat.undelivered}}
+      </div>
+      {{/unless}}
+
+  {{/if}}
+
+  {{#if content.notification}}
+    <em>{{notification}}</em>
+  {{/if}}
+
+</div>
+</script><script data-template-name="chat/end_chat_button" type="text/x-handlebars"><button {{action "endChat" target="view"}} class="end_chat btn btn-inverse">
+  {{t txt.chat.actions.end_chat}}
+</button>
+</script><script data-template-name="chat/frame" type="text/x-handlebars"><div id="chat_frame">
+  {{view contentBinding="workspace.ticket.chat" class="chat_instance" templateName="chat/instance"}}
+  {{#view tagName="div" class="chat_form" contentBinding="workspace.ticket.chat" }}
+    {{#if content.active }}
+      <div class="chat_timer">
+        <span class="total_chat">
+          {{t txt.chat.label.chat_time}}
+          <strong>{{view ChatLotus.ElapsedTimeView tagName="span" class="time" contentBinding="workspace.ticket.chat.totalChatTime.duration" }}</strong>
+        </span>
+        <span class="divider">|</span>
+        <span class="user_wait">
+          {{t txt.chat.label.wait_time}}
+          <strong>{{view ChatLotus.ElapsedTimeView tagName="span" class="time" contentBinding="workspace.ticket.chat.userWaitTime.duration" }}</strong>
+        </span>
+      </div>
+      <div class="chat_message_form">
+        <div class="textarea_container">
+          {{view ChatLotus.SendMessageView placeholder="" chatBinding="content" valueBinding="content.draft.message"}}
+        </div>
+        <button {{action "sendMessage" target="workspace.chatController"}} class="btn primary send_button">
+          {{t txt.chat.actions.send}}
+        </button>
+      </div>
+    {{/if}}
+  {{/view}}
+</div>
+</script><script data-template-name="chat/dialer" type="text/x-handlebars">{{#view ChatLotus.DialerSummaryView}}
+
+  {{#collection class="invites" id="chat-invites" contentBinding="Chat.invitesController" tagName="div"}}
+    {{#view ChatLotus.InviteView class="invite" contentBinding="content"}}
+      <div class="controls">
+
+        <div class="info">
+          <a href={{{ chatUserHref }}} class="username">{{ content.user.name }}</a>
+          {{view ChatLotus.ElapsedTimeView tagName="span" class="time" contentBinding="content.waitTime.duration" }}
+          {{#if content.organization.name }}
+            <a href={{{ chatOrganizationHref }}} class="organization">{{content.organization.name}}</a>
+          {{/if}}
+          {{#if content.ticketId }}
+            <br>
+            {{{chatTicketHref}}}
+          {{/if}}
+        </div>
+
+        <div {{bindAttr class="content.hasTicket:has-ticket :buttons"}}>
+          <button {{action "ignore" target="ChatLotus.Service.Invitations" context="content"}} class="console-button btn btn-inverse">
+            {{t txt.chat.actions.ignore}}
+          </button>
+
+          <button {{action "accept" target="ChatLotus.Service.Invitations" context="content"}} class="console-button btn btn-inverse green">
+            {{t txt.chat.actions.accept}}
+          </button>
+        </div>
+
+        <div class="chat-subject">{{ content.truncatedSubject }}</div>
+        <div style="clear: both"></div>
+      </div>
+    {{/view}}
+  {{/collection}}
+
+{{/view}}
+</script><script data-template-name="chat/notice" type="text/x-handlebars"><div class="chat_panel">
+  {{#if content.ended }}
+    <strong>{{t txt.chat.notices.chat_ended}}</strong>
+  {{/if}}
+  {{#if content.ticket.id}}
+    {{#if content.ended }},{{/if}}
+    {{#if content.ticket.isSaving}}
+      {{t txt.chat.notices.saving_ticket}}
+    {{else}}
+      {{#if content.ticket.hasErrors}}
+        {{t txt.chat.notices.saving_ticket_failed}}
+      {{else}}
+        {{#if content.newChat}}
+          {{t txt.chat.notices.ticket_created}}
+        {{else}}
+          {{t txt.chat.notices.chat_about_ticket}}
+        {{/if}}
+        <a {{bindAttr href="content.ticket.href"}} target="_blank">#{{content.ticket.id}}</a>
+      {{/if}}
+    {{/if}}
+  {{else}}
+    {{#if content.ticket}}
+      {{#if content.ended }},{{/if}}
+      {{t txt.chat.notices.new_ticket}},&nbsp;"{{content.subject}}"
+    {{/if}}
+  {{/if}}
+</div>
+</script><script data-template-name="chat/instance" type="text/x-handlebars"><div class="chat_panel_frame">
+  {{view templateName="chat/notice" contentBinding="content"}}
+</div>
+
+
+{{#view class="chat_body" contentBinding="content" tagName="div" scrollContainer="true" classNameBindings="content.ended:ended"}}
+  {{#collection contentBinding="content.messages" tagName="div"}}
+    {{view ChatLotus.MessageView contentBinding="content" classBinding="content.userType"}}
+  {{/collection}}
+
+  {{view ChatLotus.ActivityView contentBinding="content"}}
+{{/view}}
+</script><script data-template-name="chat/activity" type="text/x-handlebars">{{#if activity.typing}}
+<div class="stanza">
+  <h3><strong>{{content.participants.enduser.name}}:</strong></h3>
+  <span class="activity-typing">&hellip;</span>
+</div>
+{{/if}}
+</script><script data-template-name="chat/main_pane" type="text/x-handlebars"><header>
+  <div class='pane left'>
+    {{view_module "views/section_toolbar/section_toolbar_view" delegateBinding="workspace"}}
+  </div>
+  <div class="pane right">
+    {{view Zendesk.NextTicketView class="origin next"}}
+  </div>
+</header>
+
+<div class='pane left section'>
+  <div class="property_box section">
+
+  {{view_module "views/tickets/ticket_fields/requester_view" isVisibleBinding="workspace.ticketController.requesterMode"}}
+
+  {{view Zendesk.AssigneeView class="form_field"}}
+
+  {{#view Zendesk.CollaboratorsView class="form_field"}}
+    <label for="{{unbound fieldID}}">
+      {{ hintedLabelText }}
+      {{view Zd.CollaboratorsCcMeView class="info" ticketBinding="workspace.ticket"}}
+    </label>
+  {{/view}}
+
+  {{view_module "views/tickets/ticket_fields/linked_agreements_view"}}
+
+</div>
+
+{{#view class="property_box section" isVisibleBinding="workspace.ticketController.shouldShowTicketFormField"}}
+  {{view_module "views/tickets/ticket_fields/ticket_forms_view" controllerBinding="workspace.ticketController" ticketFormIdBinding="workspace.ticketController.ticket.ticketFormId"}}
+{{/view}}
+
+{{collection Zendesk.TicketPropertyCollectionWithoutAssigneeView contentBinding="ticketFields"}}
+
+</div>
+<div class="pane right section">
+  <div id="chat_frame">
+  {{view contentBinding="workspace.ticket.chat" class="chat_instance" templateName="chat/instance"}}
+  {{#view tagName="div" class="chat_form" contentBinding="workspace.ticket.chat" }}
+    {{#if content.active }}
+      <div class="chat_timer">
+        <span class="total_chat">
+          {{t txt.chat.label.chat_time}}
+          <strong>{{view ChatLotus.ElapsedTimeView tagName="span" class="time" contentBinding="workspace.ticket.chat.totalChatTime.duration" }}</strong>
+        </span>
+        <span class="divider">|</span>
+        <span class="user_wait">
+          {{t txt.chat.label.wait_time}}
+          <strong>{{view ChatLotus.ElapsedTimeView tagName="span" class="time" contentBinding="workspace.ticket.chat.userWaitTime.duration" }}</strong>
+        </span>
+      </div>
+      <div class="chat_message_form">
+        <div class="textarea_container">
+          {{view ChatLotus.SendMessageView placeholder="" chatBinding="content" valueBinding="content.draft.message"}}
+        </div>
+        <button {{action "sendMessage" target="workspace.chatController"}} class="btn primary send_button">
+          {{t txt.chat.actions.send}}
+        </button>
+      </div>
+    {{/if}}
+  {{/view}}
+</div>
+
+</div>
+<footer><div class='pane left section'>
+  {{#view class="dropup object_options"
+    targetBinding="parentView.workspace.ticketController"
+    ticketBinding="parentView.workspace.ticketController.ticket"
+    isVisibleBinding="parentView.workspace.ticketController.ticket.isNotNew"}}
+
+    <span class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+      {{t txt.ticket.actions.ticket_options}}
+      <b class="caret"></b>
+    </span>
+
+    <ul class="menu dropdown-menu">
+      <li {{action toForum target="target"}}><a>{{t txt.ticket.actions.to_forums}}</a></li>
+      {{#if Zendesk.globalPermissions.manageMacros}}
+        <li {{action toMacro target="target"}}><a>{{t txt.ticket.create_as_macro}}</a></li>
+      {{/if}}
+      {{#if workspace.ticketController.mergeButtonVisible}}
+        <li {{action mergeTicket target="target"}}><a>{{t txt.ticket.actions.merge_ticket_link}}</a></li>
+      {{/if}}
+      {{#if workspace.ticketController.deleteButtonVisible}}
+        <li {{action deleteTicket target="target"}}><a>{{t txt.delete_asset}}</a></li>
+      {{/if}}
+    </ul>
+  {{/view}}
+</div>
+
+<div class='pane right section'>
+  <div class="action_buttons">
+    {{view_module "views/tickets/macro_view" class="macro-selector" controllerBinding="workspace.ticketController"}}
+  </div>
+
+  {{view view.StatusView workspaceBinding="workspace"}}
+
+  <div class="ticket_chat_buttons">
+    {{view ChatLotus.EndChatButton workspaceBinding="workspace"}}
+  </div>
+
+  {{#if workspace.ticket.isClosed}}
+    <div class="ticket_submit_buttons followup">
+      {{t txt.ticket.is_closed}}
+      <button {{action createFollowupTicket target="controller"}} class="followup btn btn-inverse">
+        {{t txt.admin.helpers.tickets_helper.create_follow_up_label}}
+      </button>
+    </div>
+  {{/if}}
+</div>
+</footer>
+</script>
+  </head>
+
+  <body data-environment="production">
+    <div id="booting">
+      <div class="spinner"></div>
+      <div class="logo"></div>
+    </div>
+    <script type='text/x-handlebars'>
+      {{#view "Zendesk.RootView" id="wrapper" classBinding="Zendesk.section Zendesk.idle"}}
+        <header id="branding_header" class="split_pane">
+  {{collection Zd.TabsView class="column"}}
+
+  <div id="user_options" class="column">
+    {{#view_module "views/users/face_box_view" tagName="div" id="face_box" class="dropdown pull-right"}}
+      <a href="" id="face" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+        <img {{bindAttr src="Zendesk.currentUser.profileImageUrl"}} />
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu pull-right">
+        <li>
+          <div {{action currentUser target="Zd.userController"}} class="button">
+            <b class="name">{{Zendesk.currentUser.name}}</b>
+            <small>{{t txt.header.view_user_profile}}</small>
+          </div>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a {{action showModal target="Zd.keyboardShortcutsModalController"}} class="button" tabindex="-1" href="">
+            {{t txt.keyboard_shortcuts.title}}
+          </a>
+        </li>
+        <li>
+          <a target="_blank" href="https://support.zendesk.com/forums/21222852" tabindex="-1">{{t txt.header.give_feedback}}</a>
+        </li>
+        <li>
+          {{#linkTo Zendesk.Routes.staticPaths.helpURL}}{{t txt.header.help}}{{/linkTo}}
+        </li>
+
+        <li class="divider"></li>
+
+        <li>
+          {{#linkTo Zendesk.Routes.staticPaths.classicURL target="_blank"}}
+            {{t txt.header.view_customer_portal}}
+          {{/linkTo}}
+        </li>
+        <li>
+          {{#linkTo view.logoutLink target="_self"}}
+            {{t txt.header.user_logout}}
+          {{/linkTo}}
+        </li>
+      </ul>
+    {{/view_module}}
+
+    <button {{action toggleDialer target="Zd.dialerController"}} class="channels-control">
+      {{#if ChatLotus.Service.hasChatEnabled}}
+        {{#view tagName="div" id="chat-control" class="channel-header pull-right" classNameBindings="ChatLotus.Service.Availability.availabilityClass Zendesk.voiceController.hasVoiceEnabled"}}
+          {{view_module "views/channels/chat_icon_view"}}
+        {{/view}}
+      {{/if}}
+
+      {{#if Zd.voiceController.hasVoiceEnabled}}
+        {{#view tagName="div" id="voice-control" class="channel-header pull-right" classNameBindings="Zendesk.currentUser.voice.availability ChatLotus.Service.hasChatEnabled"}}
+          {{view_module "views/channels/voice_icon_view"}}
+        {{/view}}
+      {{/if}}
+    </button>
+
+    {{view_module "views/channels/call_timer_view" class="pull-right" isVisibleBinding="Zendesk.voiceController.hasVoiceEnabled"}}
+  </div>
+  {{#view_module "views/channels/dialer_view"}}
+  {{#view tagName="div" class="popover below dialer" classNameBindings="parentView.oneChannel" dialerBinding="parentView"}}
+    <div class="arrow"></div>
+    <div class="popover-inner">
+      {{#view tagName="div" id="voice-section" isVisibleBinding="Zendesk.voiceController.hasVoiceEnabled" }}
+        <div id="voice-header" class="item">
+          <span class="dialer-title">{{t txt.views.channels.dialer_view.voice_header}}</span>
+          {{#view_module "views/channels/availability/voice_split_availability_view" class="split dropdown"}}
+            {{#view_module "views/channels/availability/voice_availability_view" class="is-available"}}
+              {{view class="blip" classNameBindings="Zendesk.currentUser.voice.available"}}
+              <div class="text pull-left">{{label}}</div>
+            {{/view_module}}
+            <button class="btn dropdown-toggle via" data-toggle="dropdown">
+              {{view tagName="span" class="browser" isVisibleBinding="isViaBrowser"}}
+              {{view tagName="span" class="phone" isVisibleBinding="isViaPhone"}}
+              <b class="caret"></b>
+            </button>
+
+            <ul class="menu dropdown-menu pull-right">
+              <li {{action "availableViaBrowser"}}>
+                <a>
+                  <span class="browser"></span>
+                  {{t txt.views.channels.phone_number_view.specifically_via_browser}}
+                </a>
+              </li>
+              {{#if hasVoiceNumber}}
+                <li {{action "availableViaPhone"}}>
+                  <a>
+                    <span class="phone"></span>
+                    {{t txt.views.channels.phone_number_view.via_phone}} {{voiceNumber}}
+                  </a>
+                </li>
+              {{else}}
+                <li class="not-configured">
+                  <a>
+                    <span class="phone"></span>
+                    {{t txt.views.channels.phone_number_view.via_phone}} <span class="not-configured">{{t txt.views.channels.phone_number_view.not_configured}}</span>
+                  </a>
+                </li>
+              {{/if}}
+            </ul>
+          {{/view_module}}
+        </div>
+        {{#if Zendesk.dialerController.hasOutboundEnabled}}
+          <div id="calling-number" class="item">
+            <span id="dialout-icon"></span>
+            {{view_module "views/channels/phone_number_view" tagName="span" id="calling-number-select"}}
+          </div>
+          <div {{action toggleKeypad target="Zendesk.dialerController"}} onclick="return false;" {{bindAttr class=":logo-wrapper :item :sheen Zendesk.dialerController.dialerLogo"}}>
+            <div id="outbound-logo" {{bindAttr class=":dialer-logo Zendesk.dialerController.dialerLogo"}}></div>
+          </div>
+        {{/if}}
+        <div id="no-calls">
+          {{#view tagName="div" id="voice-message" class="message" isVisibleBinding="Zendesk.dialerController.noCallsMessagingVisible"}}
+            {{#if Zendesk.currentUser.voice.available}}
+              {{t txt.views.channels.dialer_view.no_incoming_calls}}
+            {{else}}
+              {{t txt.views.channels.dialer_view.currently_offline}}
+            {{/if}}
+            <a {{action showSettings target="Zendesk.voiceController" propagateEvents="true"}} onclick="return false;" class="change-settings"></a>
+          {{/view}}
+        </div>
+        {{view_module "views/channels/call_console_view" id="call-console"}}
+        {{#if Zendesk.dialerController.hasOutboundEnabled}}
+          {{#view tagName="div" id="voice-dialer" isVisibleBinding="Zendesk.dialerController.keypadVisible"}}
+            {{view_module "views/channels/outbound_dialer_view"}}
+          {{/view}}
+        {{/if}}
+      {{/view}}
+      {{#view tagName="div" id="chat-section" isVisibleBinding="ChatLotus.Service.hasChatEnabled"}}
+        <div id="chat-header" class="item">
+          <span class="dialer-title">{{t txt.views.channels.dialer_view.chat_header}}</span>
+
+          {{#view_module "views/channels/availability/chat_availability_view"}}
+            {{view class="blip" classNameBindings="ChatLotus.Service.Availability.availabilityClass"}}
+            <div class="text pull-left">{{label}}</div>
+          {{/view_module}}
+
+        </div>
+        <div id="incoming-chats">
+          {{#view tagName="div" id="chat-message" class="message" isVisibleBinding="Chat.invitesController.hasNoInvites" }}
+            {{#if ChatLotus.Service.Availability.available}}
+              {{#if Chat.invitesController.hasNoInvites}}
+                {{t txt.views.channels.dialer_view.no_incoming_chats}}
+              {{/if}}
+            {{else}}
+              {{t txt.views.channels.dialer_view.currently_offline}}
+            {{/if}}
+          {{/view}}
+          {{view ChatLotus.DialerView}}
+        </div>
+      {{/view}}
+    </div>
+    <div class="clear"></div>
+  {{/view}}
+{{/view_module}}
+
+  <div class="clear"></div>
+
+</header>
+
+{{#view Zendesk.NavBarView tagName="nav" id="main_navigation" classBinding="Zendesk.section"}}
+
+  {{linkTo Zendesk.Routes.staticPaths.dashboardURL class="dashboard toolbar_link" titleTranslation="txt.dashboard.title"}}
+
+  {{linkTo Zendesk.filterManagerController.href class="filters toolbar_link" titleTranslation="txt.filters.title"}}
+
+  {{linkTo Zendesk.Routes.staticPaths.searchURL class="search toolbar_link" titleTranslation="txt.search.title"}}
+
+  {{#if currentAccount.settings.lotus_reporting}}
+    {{#view_module "lib/views/reporting_glyph"}}
+      {{linkTo Zendesk.Routes.staticPaths.reportingURL class="reporting toolbar_link" titleTranslation="txt.search.title"}}
+    {{/view_module}}
+  {{/if}}
+
+  {{view Zendesk.NavBarAppContainerView}}
+
+  <a {{action "showAdmin"}} class="admin toolbar_link" {{translateAttr title="txt.admin.title.admin"}}></a>
+
+{{/view}}
+
+{{view_module "views/main_pane" id="main_panes"}}
+
+<div id="modals">
+  <div id="welcome" class="modal" style="display:none;">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">×</a>
+    <h3>{{t txt.modal.welcome.title}}</h3>
+  </div>
+
+  <div class="modal-body">
+
+    <p>
+      {{{Zd.welcomeModalController.lookForEmailMsg}}}
+    </p>
+
+    <p>
+      {{t txt.modal.welcome.now_is_also_a_good_time}}
+    </p>
+
+    <p>
+      {{t txt.modal.welcome.lets_get_started}}
+    </p>
+
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-inverse" data-dismiss="modal">{{t txt.modal.welcome.get_started_button}}</button>
+  </div>
+</div>
+
+  <div id="group_memberships" class="modal" style="display:none;">
+  <div class="modal-header">
+    <h3>{{Zd.groupMembershipsController.modalTitle}}</h3>
+  </div>
+
+  <div class="modal-body">
+    <p class="secondary">{{t txt.modal.group_management.intro}}</p>
+    <div class="clearfix">
+      {{#collection "Zendesk.GroupMembershipsView" userBinding="Zd.groupMembershipsController.user" itemViewClass="Zendesk.GroupMembershipItemView"}}
+        <img src="https://assets.zendesk.com/agent/assets/icons/objects/group-1d4248e06cc4e6b12bf97a288a019272.png"/>
+        <i class="checkmark icon-ok-sign" />
+        <div class="title">{{truncateAndTrim content.name length="30"}}</div>
+      {{/collection}}
+      <div class="tile new">
+        <div class="fake_link">
+          <p><a>{{t txt.modal.group_management.add_new_group}}</a></p>
+        </div>
+        <div class="real_input">
+          {{view_module "lib/lotus/labeled_text_field" valueBinding="Zd.groupMembershipsController.newGroup.name"}}
+          <button {{action addNewGroup target="Zd.groupMembershipsController"}} class="btn btn-inverse btn-small">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="options">
+      <label>{{t txt.modal.group_management.default_group_title}}</label>
+      {{view Zendesk.GroupMemberDefaultView userBinding="Zd.groupMembershipsController.user"}}
+      <p>
+        {{t txt.modal.group_management.default_group_help}}
+      </p>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">{{t txt.modal.group_management.close_window}}</button>
+  </div>
+</div>
+
+  <div id="bulk_edit" class="modal" style="display:none;">
+
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">×</a>
+    <h3>{{Zd.bulkEditController.modalTitle}}</h3>
+  </div>
+
+  <div class="modal-body">
+    <div class='pane left section ticket'>
+      {{collection Zendesk.BulkTicketPropertyCollectionView ticketBinding="Zd.bulkEditController.ticket" workspaceBinding="Zd.bulkEditWorkspace"}}
+    </div>
+
+    <div class='pane right section'>
+      <label class="subject-field">
+        {{t "ticket_fields.subject.label"}}
+        {{view Zendesk.BulkTextField
+              class="field title"
+              ticketBinding="Zd.bulkEditController.ticket"
+              valueBinding="Zd.bulkEditController.ticket.subject"
+              isVisibleBinding="Zd.bulkEditController.isSubjectActive"}}
+      </label>
+
+      {{view_module "views/tickets/add_bulk_comment_view" classBinding="content.comment.is_public:is-public" controllerBinding="Zd.bulkEditController"}}
+    </div>
+
+    <div id="bulk_edit_progress_pane">
+      {{#view isVisibleBinding="Zendesk.jobStatusController.isCompleteDelayed"}}
+        {{#unless Zendesk.jobStatusController.hasErrors}}
+          <div class="bulk_edit_success_header">
+            {{t txt.ticket.bulk_modal.done}}
+          </div>
+        {{/unless}}
+
+        {{#if Zendesk.jobStatusController.hasErrors}}
+          {{#if Zendesk.jobStatusController.hasSuccesses}}
+            <div class="bulk_edit_header">
+              {{t txt.ticket.bulk_modal.succes ticketsBinding="Zendesk.jobStatusController.successes.length"}}
+            </div>
+          {{/if}}
+
+          <div class="bulk_edit_header">
+            {{t txt.ticket.bulk_modal.failed_header}}
+          </div>
+
+          {{#collection contentBinding="Zendesk.jobStatusController.errors" class="bulk_edit_errors"}}
+            #{{content.id}} <em>{{content.errors}}</em>
+          {{/collection}}
+
+          <button {{action hideProgressForm target="Zd.bulkEditController"}} class="btn btn-inverse">
+            {{t txt.modal.edit.close}}
+          </button>
+        {{/if}}
+      {{/view}}
+
+      {{#view isVisibleBinding="Zendesk.jobStatusController.isNotCompleteDelayed"}}
+        <div class="progress-description-header">{{t txt.ticket.bulk_modal.progress_heading}}</div>
+        <div class="progress">
+          <div class="bar" {{bindAttr style="Zendesk.jobStatusController.progressStyle"}}></div>
+        </div>
+        <div class="progress-description">{{Zendesk.jobStatusController.description}}</div>
+      {{/view}}
+    </div>
+  </div>
+
+  <div class="modal-footer footer">
+    <div id="bulk_footer_controls">
+
+      {{#view class="dropup object_options" isVisibleBinding="Zd.bulkEditController.bulkTicketOptionsVisible"}}
+        <span class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+          {{t txt.ticket.actions.ticket_options}}
+          <b class="caret"></b>
+        </span>
+
+        <ul class="menu dropdown-menu">
+          {{#if Zd.bulkEditController.mergeButtonVisible}}
+            <li {{action bulkTicketMerge target="Zd.bulkEditController"}}>
+              <a>{{t txt.ticket.actions.merge_tickets_link}}</a>
+            </li>
+          {{/if}}
+          {{#if Zd.bulkEditController.deleteButtonVisible}}
+            <li {{action bulkTicketDelete target="Zd.bulkEditController"}}>
+              <a>{{t txt.delete_asset}}</a>
+            </li>
+          {{/if}}
+        </ul>
+      {{/view}}
+
+      {{view_module "views/tickets/macro_view" class="macro-selector"
+                          controllerBinding="Zd.bulkEditController"
+                          ticketBinding="Zd.bulkEditController.ticket"}}
+
+      {{#view_module "lib/split_button_menu"
+              class="btn-group dropup ticket_submit_buttons"
+              classBinding="Zd.bulkEditController.submitButtonDisabled:disabled"
+              disabledBinding="Zd.bulkEditController.submitButtonDisabled"}}
+
+        <button {{action save target="Zd.bulkEditController"}} {{bindAttr disabled="disabled"}} class="save btn btn-inverse">
+          {{#if Zd.bulkEditController.ticket.statusName}}
+            {{t txt.ticket.actions.save_as_status_with_formatting statusBinding="Zd.bulkEditController.ticket.statusDisplayName"}}
+          {{else}}
+            {{t "txt.ticket.actions.save"}}
+          {{/if}}
+        </button>
+
+        <button {{bindAttr disabled="disabled"}} data-toggle="dropdown" class="btn btn-inverse dropdown-toggle">
+          <span class="caret"></span>
+        </button>
+
+        <ul class="menu dropdown-menu pull-right">
+          {{view_module "views/tickets/bulk_edit_submit_view" status="open"}}
+          {{view_module "views/tickets/bulk_edit_submit_view" status="pending"}}
+          {{view_module "views/tickets/bulk_edit_submit_view" status="hold"}}
+          {{view_module "views/tickets/bulk_edit_submit_view" status="solved"}}
+        </ul>
+      {{/view_module}}
+    </div>
+  </div>
+</div>
+
+    <!-- modal-gallery is the modal dialog used for the image gallery -->
+  <!-- re-insert "fade" when updated to the latest bootstrap -->
+  <div id="modal-gallery" class="modal modal-gallery hide" tabindex="-1">
+      <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h3 class="modal-title"></h3>
+      </div>
+      <div class="modal-body"><div class="modal-image"></div></div>
+      <div class="modal-footer">
+        <a class="btn modal-download" target="_blank"><i class="icon-download"></i> {{t txt.image_gallery.download}}</a>
+          <a class="btn btn-primary modal-prev"><i class="icon-arrow-left icon-white"></i> {{t txt.image_gallery.previous}}</a>
+          <a class="btn btn-primary modal-next">{{t txt.image_gallery.next}} <i class="icon-arrow-right icon-white"></i></a>
+          <!-- <a class="btn btn-success modal-play modal-slideshow" data-slideshow="5000"><i class="icon-play icon-white"></i> Slideshow</a> -->
+      </div>
+  </div>
+
+
+  <div id='screencast_preview' class='modal' style="display: none;">
+    <div id="video_wrapper">
+      <iframe frameborder="0" {{bindAttr src="Zd.screencastController.screencast.url"}} id="screenr_iframe"></iframe>
+    </div>
+    <div id="screencast_comment">
+      {{{Zd.screencastController.screencast.comment.value}}}
+    </div>
+  </div>
+
+  <div id="nonexistent_ticket" class="modal error" style="display: none;">
+    <div class="modal-header">
+      <a class="close" data-dismiss="modal">×</a>
+      <h3>{{t txt.modal.error.header}}</h3>
+    </div>
+    <div class="modal-body">{{t txt.modal.error.body.nonexistent_ticket}}</div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">{{t txt.modal.edit.close}}</button>
+    </div>
+  </div>
+
+  <div id="reload_notice" class="modal" style="display: none;">
+    <div class="modal-header">
+      <a class="close" data-dismiss="modal">×</a>
+      <h3>{{t "txt.modal.reload.title"}}</h3>
+    </div>
+    <div class="modal-body">
+      <p>{{{t txt.modal.reload.message}}}</p>
+    </div>
+    <div class="modal-footer">
+      <a class="btn btn-inverse" href="/agent">{{t txt.modal.reload.button.reload}}</a>
+    </div>
+  </div>
+
+  <div id="ticket-merge" class="modal merge-holder" style="display: none;">
+    <div class="modal-header">
+      <a class="close" data-dismiss="modal">×</a>
+      <h3>{{t txt.modal.ticket_merge.header}}</h3>
+    </div>
+    <div class="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">{{t txt.modal.edit.close}}</button>
+      <button class="btn btn-inverse" id="btn-ticket-confirm-and-merge" style="display:none">{{t txt.modal.ticket_merge.confirm}}</button>
+    </div>
+  </div>
+
+  <div id="user-merge" class="modal merge-holder" style="display: none;">
+    <div class="modal-header">
+      <a class="close" data-dismiss="modal">×</a>
+      <h3>{{t txt.modal.user_merge.header}}</h3>
+    </div>
+    <div class="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">{{t txt.modal.edit.close}}</button>
+      <button class="btn btn-inverse" id="btn-user-confirm-and-merge" style="display:none">{{t txt.modal.user_merge.confirm}}</button>
+    </div>
+  </div>
+
+</div>
+
+
+      {{/view}}
+    </script>
+
+    <script src="/api/v2/locales/current.json?include=translations&packages=lotus&callback=__zendesk_config._cb"></script>
+    <script src="https://assets.zendesk.com/agent/assets/vendor-e71454859fda8888de3b295cf7e3a8a0.js" type="text/javascript"></script>
+    <script src="https://assets.zendesk.com/agent/assets/templates-9dbd1048f72337976739ab2e1eb8d6e9.js" type="text/javascript"></script>
+    <script src="/assets/apps/framework/v0.5.js"></script>
+    <script src="/api/v2/apps/installed.js"></script>
+    <script src="https://assets.zendesk.com/agent/assets/application-5192d5a03bfcc753bea96e766aae1125.js" type="text/javascript"></script>
+    <script src="https://assets.zendesk.com/agent/assets/ticket_forms-ec1247e3ed82dc35f5e8da989db3e052.js" type="text/javascript"></script>
+    <script src="https://assets.zendesk.com/agent/assets/chat-23a719803409b741c575f7ab34dee6af.js" type="text/javascript"></script>
+
+    <script type="text/javascript" charset="utf-8">
+      Zendesk.currentVersion = {};
+      Zendesk.currentVersion.tag = 'v1.30.1';
+      Zendesk.currentVersion.sha = '49c64d6d16592ba105f7ff1c3769ca904fa0999d';
+    </script>
+
+  </body>
+</html>
