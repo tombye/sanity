@@ -1,3 +1,14 @@
+/*
+ * Sanity
+ * 
+ * Make user agent strings legible
+ * Tom Byers | @tombyers
+ * Format blatantly copied from @rooreynolds Jargone
+ * 
+ * [NB: sanity.js is built using build.sh. Expect changes here to be overwritten]
+ */
+
+(function () { 
 window.sanity = window.sanity || {};
 
 sanity.parse = function (agent_str) {
@@ -132,3 +143,4 @@ sanity.tokens.ie = {
   }
 };
 sanity.parse(document.getElementsByTagName('pre')[0].innerText);
+})();

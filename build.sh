@@ -7,6 +7,6 @@
 # It will output a file called jargone.js
 # It can be run from this directory as ./build.sh
 
-cat parser.js.pre > parser.js
-car parser.core.js >> parser.js
-cat parser.js.post >> parser.js
+cat sanity.js.pre > sanity.js
+cat sanity.js.core >> sanity.js
+cat sanity.js.post >> sanity.js
