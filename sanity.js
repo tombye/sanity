@@ -48,30 +48,42 @@ sanity.parse = function (agent_str) {
   return false;
 };
 
+sanity.matchToken = function (str, tokens, token) {
+  var match;
+  // if variant includes variable version, capture
+  if (token instanceof RegExp) {
+    match = str.match(tokens[token]);
+    result = token.replace('%d', match[1]);
+    return result;
+  } else {
+    if (str === tokens[token]) {
+      return token;
+    }
+  }
+
+  return false;
+};
+
 sanity.getInfoFor = {
   'ie' : function (browser_details) {    
     var browser = 'ie',
-        tokens = browser_details[1].split('; '),
+        os = 'windows',
+        browserTokens = sanity.tokens[browser],
+        osTokens = sanity.tokens[os],
+        ua_tokens = browser_details[1].split('; '),
         variant,
         token_type,
         match,
-        result,
         results = {},
         idx,
         len;
 
-    for (token_type in sanity.tokens[browser]) {
-      for (variant in sanity.tokens[browser][token_type]) {
-        for (idx = 0, len = tokens.length; idx < len; idx++) {
-          // if variant includes variable version, capture
-          if (variant instanceof RegExp) {
-            match = tokens[idx].match(sanity.tokens[browser][token_type][variant]);
-            result = variant.replace('%d', match[1]);
-            results[token_type] = result;
-          } else {
-            if (tokens[idx] === sanity.tokens[browser][token_type][variant]) {
-              results[token_type] = variant;
-            }
+    for (token_type in browserTokens) {
+      for (variant in browserTokens[token_type]) {
+        for (idx = 0, len = ua_tokens.length; idx < len; idx++) {
+          match = sanity.matchToken(ua_tokens[idx], browserTokens[token_type], variant);
+          if (match) {
+            results[token_type] = variant;
           }
         }
       }
