@@ -40,8 +40,8 @@ sanity.parse = function (agent_str) {
   browser = browserData.browser;
   details = browserData.info;
 
-  if (browser && (typeof sanity.getInfoFor[browser] !== 'undefined')) {
-    return sanity.getInfoFor[browser](details);
+  if (browser) {
+    return new sanity.Info(browser, details);
   }
 
   // if at this point, fail
@@ -64,33 +64,77 @@ sanity.matchToken = function (str, tokens, token) {
   return false;
 };
 
-sanity.getInfoFor = {
-  'ie' : function (browser_details) {    
-    var browser = 'ie',
-        os = 'windows',
-        browserTokens = sanity.tokens[browser],
-        osTokens = sanity.tokens[os],
-        ua_tokens = browser_details[1].split('; '),
-        variant,
-        token_type,
-        match,
-        results = {},
-        idx,
-        len;
+sanity.Info = function (browser, details) {
+  this.browser = browser;
+  this.details = details[1].split('; '),
+  this.getOSInfo();
+  this.getBrowserInfo();
+};
 
-    for (token_type in browserTokens) {
-      for (variant in browserTokens[token_type]) {
-        for (idx = 0, len = ua_tokens.length; idx < len; idx++) {
-          match = sanity.matchToken(ua_tokens[idx], browserTokens[token_type], variant);
-          if (match) {
-            results[token_type] = variant;
-          }
+sanity.Info.prototype.getOSInfo = function () {
+  var systems = sanity.tokens.os,
+      os_tokens, 
+      os_token,
+      platform_token,
+      feature_tokens,
+      feature_token,
+      result = false,
+      os,
+      match,
+      idx;
+
+  get_platform:
+  for (os_token in systems) {
+    os_tokens = systems[os_token];
+    for (platform_token in os_tokens.platform) {
+      for (idx = 0, len = this.details.length; idx < len; idx++) {
+        match = sanity.matchToken(this.details[idx], os_tokens.platform, platform_token)
+        if (match) {
+          os = os_token;
+          result = {
+            os : platform_token
+          };
+          break get_platform;
         }
       }
     }
-
-    return (results === {}) ? results : false;
   }
+  if (result !== false && (typeof systems[os].feature !== 'undefined')) {
+    feature_tokens = systems[os].feature;
+    for (feature_token in feature_tokens) {
+      for (idx = 0, len = this.details.length; idx < len; idx++) {
+        match = sanity.matchToken(this.details[idx], feature_tokens, feature_token)
+        if (match) {
+          result.feature = feature_token;
+        }
+      }
+    }
+  }
+
+  this.osInfo = result;
+};
+
+sanity.Info.prototype.getBrowserInfo = function () {
+  var browserTokens = sanity.tokens[this.browser],
+      variant,
+      token_type,
+      match,
+      results = {},
+      idx,
+      len;
+
+  for (token_type in browserTokens) {
+    for (variant in browserTokens[token_type]) {
+      for (idx = 0, len = this.details.length; idx < len; idx++) {
+        match = sanity.matchToken(this.details[idx], browserTokens[token_type], variant);
+        if (match) {
+          results[token_type] = variant;
+        }
+      }
+    }
+  }
+
+  this.browserInfo = (results === {}) ? false : results;
 };
 
 sanity.ua_strings = {
@@ -102,7 +146,7 @@ sanity.ua_strings = {
   // FF36: /^Mozilla\/5\.0 \((Windows|Macintosh); U;(.*)rv\:1\.9\.2.(\d{1,2})\)( Gecko\/(\d{8}))? Firefox\/3\.6(\.\d{1,2})?( \(.+\))?$/,
 
   // Chrome 16-23
-  chrome: /^Mozilla\/5\.0 \((Windows NT|Macintosh)(;)?( .*)\) AppleWebKit\/53\d\.\d{1,2} \(KHTML, like Gecko\) Chrome\/(16|17|18|19|20|21|22|23)\.0\.\d{3,4}\.\d{1,2} Safari\/53\d\.\d{1,2}$/,
+  chrome: /^Mozilla\/5\.0 \(([^\)]+)\) AppleWebKit\/53\d\.\d{1,2} \(KHTML, like Gecko\) Chrome\/[\d\.]+ Safari\/[\d\.]+$/,
 
   // Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0
   firefox: /^Mozilla\/5\.0 \((Windows NT \d\.\d|Macintosh); (.*)rv\:(9|10|11|12|13|14|15|16)\.0(\.\d{1,2})?\) Gecko\/\d{8} Firefox\/(9|10|11|12|13|14|15|16)\.0(\.\d{1,2})?$/,
@@ -111,8 +155,15 @@ sanity.ua_strings = {
   safari: /^Mozilla\/5\.0 \((Windows NT \d\.\d|Macintosh)(.*)\) AppleWebKit\/534\.\d{2}(\.\d{1,2})? \(KHTML, like Gecko\) Version\/5\.1\.\d Safari\/534\.\d{2}(\.\d{1,2})?$/
 };
 
-sanity.tokens = {};
-sanity.tokens.windows = {
+sanity.tokens = {
+  os : {}
+};
+sanity.tokens.os.macintosh = {
+  platform : {
+    'Macintosh OSX 10.6.8' : 'Intel Mac OS X 10_6_8'
+  }
+};
+sanity.tokens.os.windows = {
   platform : {
     'Windows 8' : 'Windows NT 6.2',
     'Windows 7' : 'Windows NT 6.1',
