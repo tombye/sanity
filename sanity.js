@@ -69,44 +69,56 @@ sanity.Info = function (browser, details) {
   this.details = details[1].split('; '),
   this.getOSInfo();
   this.getBrowserInfo();
+  this.postProcess();
+};
+
+sanity.Info.prototype.postProcess = function () {
+  if (typeof sanity.vendorRules[this.browser] !== 'undefined') {
+    sanity.vendorRules[this.browser].call(this);
+  }
+};
+
+sanity.Info.prototype.checkDetails = function (obj, prop) {
+  var idx,
+      len,
+      match;
+
+  for (idx = 0, len = this.details.length; idx < len; idx++) {
+    match = sanity.matchToken(this.details[idx], obj, prop)
+    if (match) {
+      return match;
+    }
+  }
+  return false;
 };
 
 sanity.Info.prototype.getOSInfo = function () {
   var systems = sanity.tokens.os,
-      os_tokens, 
-      os_token,
+      system,
+      make,
       platform_token,
       feature_tokens,
       feature_token,
       result = false,
-      os,
-      match,
-      idx;
+      os;
 
   get_platform:
-  for (os_token in systems) {
-    os_tokens = systems[os_token];
-    for (platform_token in os_tokens.platform) {
-      for (idx = 0, len = this.details.length; idx < len; idx++) {
-        match = sanity.matchToken(this.details[idx], os_tokens.platform, platform_token)
-        if (match) {
-          os = os_token;
-          result = {
-            os : platform_token
-          };
-          break get_platform;
-        }
+  for (make in systems) {
+    system = systems[make];
+    for (platform_token in system.platform) {
+      if (this.checkDetails(system.platform, platform_token)) {
+        os = make;
+        result = { os : platform_token };
+        break get_platform;
       }
     }
   }
+  
   if (result !== false && (typeof systems[os].feature !== 'undefined')) {
     feature_tokens = systems[os].feature;
     for (feature_token in feature_tokens) {
-      for (idx = 0, len = this.details.length; idx < len; idx++) {
-        match = sanity.matchToken(this.details[idx], feature_tokens, feature_token)
-        if (match) {
-          result.feature = feature_token;
-        }
+      if (this.checkDetails(feature_tokens, feature_token)) {
+        result.feature = feature_token;
       }
     }
   }
@@ -118,18 +130,12 @@ sanity.Info.prototype.getBrowserInfo = function () {
   var browserTokens = sanity.tokens[this.browser],
       variant,
       token_type,
-      match,
-      results = {},
-      idx,
-      len;
+      results = {};
 
   for (token_type in browserTokens) {
     for (variant in browserTokens[token_type]) {
-      for (idx = 0, len = this.details.length; idx < len; idx++) {
-        match = sanity.matchToken(this.details[idx], browserTokens[token_type], variant);
-        if (match) {
-          results[token_type] = variant;
-        }
+      if (this.checkDetails(browserTokens[token_type], variant)) {
+        results[token_type] = variant;
       }
     }
   }
@@ -153,6 +159,17 @@ sanity.ua_strings = {
 
   // 
   safari: /^Mozilla\/5\.0 \((Windows NT \d\.\d|Macintosh)(.*)\) AppleWebKit\/534\.\d{2}(\.\d{1,2})? \(KHTML, like Gecko\) Version\/5\.1\.\d Safari\/534\.\d{2}(\.\d{1,2})?$/
+};
+
+sanity.vendorRules = {
+  ie : function () {
+    var info = this.browserInfo;
+    if (info.version !== info.trident) {
+      info.misc = 'Browser is in compatibility mode, set to ' + info.version;
+      info.version = info.trident;
+      delete info.trident;
+    }
+  }
 };
 
 sanity.tokens = {
